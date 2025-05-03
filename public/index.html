@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Party Game</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 80%;
+      max-width: 800px;
+      background: #fff;
+      color: #000;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    #timer-container {
+      width: 100%;
+      height: 8px;
+      background: #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    #timer-bar {
+      width: 0%;
+      height: 100%;
+      background: #CFFE47;
+      transition: width 1s linear;
+    }
+    #question-number {
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    #question-text {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    #options-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .option {
+      background: #fff;
+      border: 4px solid;
+      border-radius: 8px;
+      padding: 20px;
+      font-size: 1rem;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      cursor: pointer;
+    }
+    #option0 { border-color: #FF5722; }
+    #option1 { border-color: #2196F3; }
+    #option2, #option3 { display: none; }
+    #start-btn {
+      padding: 10px 20px;
+      margin: 20px;
+      background: #00c853;
+      color: white;
+      border: none;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="qr-container" style="margin-bottom: 20px; display: none;">
+    <p>📲 Escaneá este código QR para unirte:</p>
+    <canvas id="qr-canvas"></canvas>
+  </div>
+  <button id="start-btn">Iniciar Juego</button>
+
+  <div id="form-container" style="margin: 20px; display: none;">
+    <h2>Ingresá para jugar</h2>
+    <input type="text" id="input-nombre" placeholder="Tu nombre" /><br /><br />
+    <input type="email" id="input-correo" placeholder="Tu correo" /><br /><br />
+    <button id="btn-ingresar">Ingresar</button>
+  </div>
+  
+  <div class="container">
+    <div id="timer-container">
+      <div id="timer-bar"></div>
+    </div>
+    <div id="question-number">Pregunta Nro <span id="question-index">1</span></div>
+    <div id="question-text">Esperando inicio...</div>
+    <div id="options-container">
+      <div class="option" id="option0"></div>
+      <div class="option" id="option1"></div>
+      <div class="option" id="option2"></div>
+      <div class="option" id="option3"></div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    let tipo = 'jugador';
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('tipo')) {
+  tipo = urlParams.get('tipo');
+} else {
+  tipo = prompt('¿Sos jugador o master? Escribí "jugador" o "master"').toLowerCase();
+}
+    const salaId = 'sala1';
+    let preguntaActual = null;
+    let yaVotado = false;
+
+    socket.on('connect', () => {
+      
+      if (tipo === 'master') {
+  document.getElementById('start-btn').style.display = 'block';
+
+  const qrContainer = document.getElementById('qr-container');
+  const qrCanvas = document.getElementById('qr-canvas');
+  qrContainer.style.display = 'block';
+
+  const baseUrl = window.location.origin + window.location.pathname;
+  const urlConParametro = `${baseUrl}?tipo=jugador`;
+
+  QRCode.toCanvas(qrCanvas, urlConParametro, function (error) {
+    if (error) console.error(error);
+  });
+
+} else {
+  // mostrar formulario para jugadores
+  document.getElementById('form-container').style.display = 'block';
+}
+    });
+    document.getElementById('btn-ingresar').addEventListener('click', () => {
+  const nombre = document.getElementById('input-nombre').value.trim();
+  const correo = document.getElementById('input-correo').value.trim();
+
+  if (!nombre || !correo) {
+    alert('Por favor completá tu nombre y correo');
+    return;
+  }
+
+  localStorage.setItem('nombreJugador', nombre);
+  localStorage.setItem('correoJugador', correo);
+
+  document.getElementById('form-container').style.display = 'none';
+
+  socket.emit('joinSala', { salaId, tipo, nombre, correo });
+});
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      socket.emit('startJuego', {
+        salaId,
+        tiempoPorRonda: 15,
+        preguntas: [
+          { id: 'p1', texto: '¿Qué preferís?', opcion1: 'Pizza', opcion2: 'Hamburguesa' },
+          { id: 'p2', texto: '¿Frío o calor?', opcion1: 'Invierno', opcion2: 'Verano' }
+        ]
+      });
+    });
+
+    socket.on('preguntaNueva', (data) => {
+      preguntaActual = data;
+      yaVotado = false;
+      document.getElementById('question-text').textContent = data.texto;
+      document.getElementById('question-index').textContent = data.preguntaId;
+      document.getElementById('option0').textContent = data.opcion1;
+      document.getElementById('option1').textContent = data.opcion2;
+      startTimer(data.timer);
+    });
+
+    document.getElementById('option0').addEventListener('click', () => votar('op1'));
+    document.getElementById('option1').addEventListener('click', () => votar('op2'));
+
+    function votar(opcion) {
+      if (yaVotado || tipo === 'master') return;
+      yaVotado = true;
+      socket.emit('votar', {
+        salaId,
+        jugadorId: socket.id,
+        preguntaId: preguntaActual.preguntaId,
+        opcionElegida: opcion
+      });
+    }
+
+    socket.on('actualizarVotos', ({ conteo }) => {
+      const total = conteo.op1 + conteo.op2 || 1;
+      const p1 = Math.round((conteo.op1 / total) * 100);
+      const p2 = Math.round((conteo.op2 / total) * 100);
+      document.getElementById('option0').textContent += ` (${p1}%)`;
+      document.getElementById('option1').textContent += ` (${p2}%)`;
+    });
+
+    function startTimer(segundos) {
+      const bar = document.getElementById('timer-bar');
+      bar.style.width = '0%';
+      let tiempo = 0;
+      const intervalo = setInterval(() => {
+        tiempo++;
+        bar.style.width = `${(tiempo / segundos) * 100}%`;
+        if (tiempo >= segundos) {
+          clearInterval(intervalo);
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
