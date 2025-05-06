@@ -1,0 +1,83 @@
+[
+    {
+      "question": "¿Qué lenguaje de programación es más usado en IA?",
+      "answer1": "Python",
+      "answer2": "JavaScript",
+      "answer3": "Java",
+      "answer4": "C++",
+      "correct": 0
+    },
+    {
+      "question": "¿Qué framework de JS se usa en la actualidad para apps web?",
+      "answer1": "AngularJS",
+      "answer2": "Vue.js",
+      "answer3": "React",
+      "answer4": "Ember.js",
+      "correct": 2
+    },
+    {
+      "question": "¿Cuál es la métrica clave para evaluar un modelo de clasificación?",
+      "answer1": "Precisión",
+      "answer2": "Recall",
+      "answer3": "F1-Score",
+      "answer4": "MAE",
+      "correct": 2
+    },
+    {
+      "question": "¿Qué motor de videojuego es gratuito?",
+      "answer1": "Unreal Engine",
+      "answer2": "CryEngine",
+      "answer3": "Unity",
+      "answer4": "Frostbite",
+      "correct": 2
+    },
+    {
+      "question": "¿Cuál es el formato de textura ideal para videojuegos?",
+      "answer1": "PNG",
+      "answer2": "JPEG",
+      "answer3": "BMP",
+      "answer4": "TIFF",
+      "correct": 0
+    },
+    {
+      "question": "¿Qué API de ML ofrece Google?",
+      "answer1": "TensorFlow.js",
+      "answer2": "PyTorch",
+      "answer3": "Google ML Kit",
+      "answer4": "Scikit-learn",
+      "correct": 2
+    },
+    {
+      "question": "¿Qué arquitectura de red neuronal es recurrente?",
+      "answer1": "CNN",
+      "answer2": "RNN",
+      "answer3": "DNN",
+      "answer4": "GAN",
+      "correct": 1
+    },
+    {
+      "question": "¿Qué plataforma es popular para streaming de juegos?",
+      "answer1": "Netflix",
+      "answer2": "Twitch",
+      "answer3": "YouTube",
+      "answer4": "Hulu",
+      "correct": 1
+    },
+    {
+      "question": "¿Qué tecnología habilita NFTs?",
+      "answer1": "Blockchain",
+      "answer2": "AI",
+      "answer3": "VR",
+      "answer4": "AR",
+      "correct": 0
+    },
+    {
+      "question": "¿Qué lenguaje se usa en desarrollo de sistemas embebidos?",
+      "answer1": "C",
+      "answer2": "Python",
+      "answer3": "Ruby",
+      "answer4": "Go",
+      "correct": 0
+    }
+  ]
+  
