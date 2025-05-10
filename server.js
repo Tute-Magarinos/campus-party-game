@@ -120,3 +120,6 @@ function showAnswer(salaId) {
 }
 
 server.listen(3000, () => console.log('http://localhost:3000/'));
+
+const setupSocket = require('./socketHandlers');
+setupSocket(io);
