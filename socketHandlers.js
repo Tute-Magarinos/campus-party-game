@@ -1,8 +1,7 @@
-// socketHandlers.js con integración a Supabase
+// socketHandlers.js con integración a Supabase y tracking por sala
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Configura tus claves de Supabase
 const supabaseUrl = 'https://hubutcazejiyfdlkbbqu.supabase.co'; 
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YnV0Y2F6ZWppeWZkbGtiYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MDEzMDcsImV4cCI6MjA2MjQ3NzMwN30.jDC0dg9qvlDcdCYIRA4WslftXW6Ng8b7B9Rc4AZUaPQ';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -22,17 +21,20 @@ function setupSocket(io) {
 
       console.log(`🔗 ${tipo} unido a sala ${salaId} - ${nombre || ''}`);
 
-      // Guardar jugador en Supabase
+      // Insertar sala si no existe
+      await supabase.from('salas').upsert({ id: salaId });
+
+      // Guardar jugador en Supabase con sala_id
       const { data, error } = await supabase
         .from('jugadores')
-        .insert({ nombre: socket.data.nombre, correo: socket.data.correo, socket_id: socket.id })
+        .insert({ nombre: socket.data.nombre, correo: socket.data.correo, socket_id: socket.id, sala_id: salaId })
         .select()
         .single();
 
       if (error) {
         console.error('Error al registrar jugador:', error.message);
       } else {
-        socket.data.jugadorId = data.id; // Guardamos su ID para usar al votar
+        socket.data.jugadorId = data.id;
       }
 
       const sala = salas[salaId];
