@@ -3,224 +3,214 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Campus Party Game</title>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <title>Master - Campus Party Game</title>
   <style>
+    /* CSS existente */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-    }
-    .container {
-      width: 80%;
-      max-width: 800px;
-      background: #fff;
-      color: #000;
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    #timer-container {
-      width: 100%;
-      height: 8px;
-      background: #ddd;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    #timer-bar {
-      width: 0%;
-      height: 100%;
-      background: #CFFE47;
-      transition: width 1s linear;
-    }
-    #question-number {
-      font-size: 0.9rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      color: #333;
-      margin-bottom: 8px;
-    }
-    #question-text {
-      font-size: 1.8rem;
-      margin-bottom: 30px;
-      color: #333;
-    }
-    #options-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .option {
-      background: #fff;
-      border: 4px solid;
-      border-radius: 8px;
-      padding: 20px;
-      font-size: 1rem;
-      color: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100px;
-      cursor: pointer;
-    }
-    #option0 { border-color: #FF5722; }
-    #option1 { border-color: #2196F3; }
-    #option2, #option3 { display: none; }
-    #start-btn {
-      padding: 10px 20px;
-      margin: 20px;
-      background: #00c853;
-      color: white;
-      border: none;
-      font-size: 1.2rem;
-      border-radius: 8px;
-      cursor: pointer;
-      display: none;
-    }
+    body { font-family:'Segoe UI', Tahoma,sans-serif; background:#121212; color:#fff; height:100vh; display:flex; align-items:center; justify-content:center; }
+    .screen { display:none; width:90%; max-width:600px; background:#1e1e1e; border-radius:12px; padding:30px; box-shadow:0 8px 16px rgba(0,0,0,0.5); text-align:center; }
+    .active { display:block; }
+    h2 { margin-bottom:20px; font-size:1.6rem; letter-spacing:1px; color:#CFFE47; }
+    .config label { display:block; text-align:left; margin:10px 0 5px; font-size:0.9rem; color:#bbb; }
+    .config input { width:calc(100% - 20px); padding:10px; margin-bottom:10px; font-size:1rem; border:1px solid #333; border-radius:6px; background:#2a2a2a; color:#fff; }
+    .config button { width:100%; padding:12px; font-size:1.1rem; border:none; border-radius:6px; background:#CFFE47; color:#000; cursor:pointer; margin-top:15px; transition:background .3s; }
+    .config button:hover { background:#b5e23d; }
+    .lobby p { font-size:1.1rem; margin-bottom:15px; color:#ddd; }
+    .lobby #qrCode { width:200px; height:200px; margin:0 auto 15px; display:none; border:4px solid #333; border-radius:8px; background:#fff; }
+    .lobby a { color:#CFFE47; word-break:break-all; display:none; margin-bottom:20px; }
+    .lobby button { padding:12px 20px; font-size:1.1rem; border:none; border-radius:6px; background:#CFFE47; color:#000; cursor:pointer; transition:background .3s; }
+    .lobby button:hover { background:#b5e23d; }
+    .game { position:relative; }
+    .game #timer-container { width:100%; height:8px; background:#333; border-radius:4px; overflow:hidden; margin-bottom:20px; }
+    .game #timer-bar { width:0; height:100%; background:#CFFE47; transition:width linear; }
+    .game #question-number { font-size:0.9rem; text-transform:uppercase; margin-bottom:8px; color:#bbb; }
+    .game #question-text { font-size:1.5rem; margin-bottom:20px; background:#2a2a2a; padding:15px; border-radius:8px; color:#fff; }
+    .game #options-container { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+    .game .option { background:#2a2a2a; color:#fff; padding:15px; border-radius:8px; font-size:1rem; display:flex; align-items:center; justify-content:center; min-height:80px; border:3px solid transparent; transition:background .3s,border-color .3s; }
+    .game .option:hover { background:#333; }
+    #overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); color:#CFFE47; display:none; align-items:center; justify-content:center; font-size:2rem; border-radius:12px; }
   </style>
+  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 </head>
 <body>
-  <div id="qr-container" style="margin-bottom: 20px; display: none;">
-    <p>📲 Escaneá este código QR para unirte:</p>
-    <canvas id="qr-canvas"></canvas>
+  <!-- Configuración -->
+  <div id="configSection" class="screen active config">
+    <h2>Configuración del Juego</h2>
+    <label for="salaIdInput">ID de Sala</label>
+    <input id="salaIdInput" placeholder="sala1" value="sala1" />
+    <label for="qCountInput">Cantidad de Preguntas</label>
+    <input id="qCountInput" type="number" value="5" min="1" max="10" />
+    <label for="qTimeInput">Tiempo por Pregunta (segundos)</label>
+    <input id="qTimeInput" type="number" value="15" min="5" max="60" />
+    <button id="toLobbyBtn">Continuar</button>
   </div>
-  <button id="start-btn">Iniciar Juego</button>
-
-  <div id="form-container" style="margin: 20px; display: none;">
-    <h2>Ingresá para jugar</h2>
-    <input type="text" id="input-nombre" placeholder="Tu nombre" /><br /><br />
-    <input type="email" id="input-correo" placeholder="Tu correo" /><br /><br />
-    <button id="btn-ingresar">Ingresar</button>
+  <!-- Lobby -->
+  <div id="lobbySection" class="screen lobby">
+    <h2>Lobby</h2>
+    <p>Escanea este QR en tu celular:</p>
+    <img id="qrCode" src="" alt="QR" />
+    <p>o visita:</p>
+    <a id="lobbyUrl" href="#" target="_blank"></a>
+    <button id="startBtn">Iniciar Juego</button>
   </div>
-  
-  <div class="container">
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-    </div>
-    <div id="question-number">Pregunta Nro <span id="question-index">1</span></div>
-    <div id="question-text">Esperando inicio...</div>
+  <!-- Juego -->
+  <div id="gameSection" class="screen game">
+    <div id="timer-container"><div id="timer-bar"></div></div>
+    <div id="question-number">Pregunta Nro <span id="question-index">0</span></div>
+    <div id="question-text"></div>
     <div id="options-container">
       <div class="option" id="option0"></div>
       <div class="option" id="option1"></div>
       <div class="option" id="option2"></div>
       <div class="option" id="option3"></div>
     </div>
+    <div id="overlay"></div>
   </div>
-
   <script>
+    // URL del JSON de preguntas
+    const qsUrl = '/questions.json';
+    let QUESTIONS = [];
+    // Elementos DOM
+    const configSection = document.getElementById('configSection');
+    const lobbySection = document.getElementById('lobbySection');
+    const gameSection = document.getElementById('gameSection');
+    const salaInput = document.getElementById('salaIdInput');
+    const qCountInput = document.getElementById('qCountInput');
+    const qTimeInput = document.getElementById('qTimeInput');
+    const toLobbyBtn = document.getElementById('toLobbyBtn');
+    const startBtn = document.getElementById('startBtn');
+    const qrImg = document.getElementById('qrCode');
+    const lobbyUrl = document.getElementById('lobbyUrl');
+    const timerBar = document.getElementById('timer-bar');
+    const qIndexEl = document.getElementById('question-index');
+    const qTextEl = document.getElementById('question-text');
+    const opts = [0,1,2,3].map(i => document.getElementById('option'+i));
+    const overlay = document.getElementById('overlay');
+    const optionColors = ['#FF5722','#2196F3','#CFFE47','#FFEB3B'];
+
+    let duration, timerAnim, overlayAnim;
     const socket = io();
-    let tipo = 'jugador';
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('tipo')) {
-  tipo = urlParams.get('tipo');
-} else {
-  tipo = prompt('¿Sos jugador o master? Escribí "jugador" o "master"').toLowerCase();
-}
-    const salaId = 'sala1';
-    let preguntaActual = null;
-    let yaVotado = false;
 
-    socket.on('connect', () => {
-      
-      if (tipo === 'master') {
-  document.getElementById('start-btn').style.display = 'block';
+    // Cargar preguntas desde JSON
+    fetch(qsUrl)
+      .then(res => res.json())
+      .then(data => { QUESTIONS = data; })
+      .catch(err => console.error('Error cargando preguntas:', err));
 
-  const qrContainer = document.getElementById('qr-container');
-  const qrCanvas = document.getElementById('qr-canvas');
-  qrContainer.style.display = 'block';
+    // Función para mostrar Configuración
+    function showConfig() {
+      clearTimeout(timerAnim);
+      clearTimeout(overlayAnim);
+      // Reset screens
+      configSection.classList.add('active');
+      lobbySection.classList.remove('active');
+      gameSection.classList.remove('active');
+    }
 
-  const baseUrl = window.location.origin + window.location.pathname;
-  const urlConParametro = `${baseUrl}?tipo=jugador`;
+    // Config -> Lobby
+    toLobbyBtn.onclick = () => {
+      showConfig(); // ensure clearing
+      duration = parseInt(qTimeInput.value)*1000;
+      const sala = salaInput.value.trim();
+      const qCount = parseInt(qCountInput.value,10);
+      const mobileUrl = `${location.origin}/mobile.html?salaId=${encodeURIComponent(sala)}`;
+      lobbyUrl.href = mobileUrl;
+      lobbyUrl.textContent = mobileUrl;
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
+      qrImg.style.display = 'block';
+      lobbyUrl.style.display = 'block';
+      configSection.classList.remove('active');
+      lobbySection.classList.add('active');
+      socket.emit('joinSala', { salaId: sala, tipo: 'master' });
+      startBtn.dataset.sala = sala;
+      startBtn.dataset.qCount = qCount;
+    };
 
-  QRCode.toCanvas(qrCanvas, urlConParametro, function (error) {
-    if (error) console.error(error);
+    // Lobby -> Juego
+    startBtn.onclick = () => {
+      clearTimeout(timerAnim);
+      clearTimeout(overlayAnim);
+      const sala = startBtn.dataset.sala;
+      const qCount = parseInt(startBtn.dataset.qCount,10);
+      socket.emit('startGame', { salaId: sala, questionCount: qCount });
+      lobbySection.classList.remove('active');
+      gameSection.classList.add('active');
+    };
+
+    socket.on('preguntaNueva', ({ preguntaIndex, preguntaText, options }) => {
+  // 1) Limpiar timeouts previos
+  clearTimeout(timerAnim);
+  clearTimeout(overlayAnim);
+  overlay.style.display = 'none';
+
+  // 2) Asignar las respuestas SIN tocar el JSON local de preguntas:
+  opts.forEach((el, i) => {
+    el.textContent = options[i];
+    el.style.background   = '#2a2a2a';
+    el.style.borderColor  = optionColors[i];
   });
 
-} else {
-  // mostrar formulario para jugadores
-  document.getElementById('form-container').style.display = 'block';
-}
-    });
-    document.getElementById('btn-ingresar').addEventListener('click', () => {
-  const nombre = document.getElementById('input-nombre').value.trim();
-  const correo = document.getElementById('input-correo').value.trim();
+  // 3) Si quieres seguir mostrando el texto de la pregunta desde tu JSON local:
+  qTextEl.textContent = preguntaText;
+  qIndexEl.textContent = preguntaIndex + 1;
 
-  if (!nombre || !correo) {
-    alert('Por favor completá tu nombre y correo');
-    return;
-  }
-
-  localStorage.setItem('nombreJugador', nombre);
-  localStorage.setItem('correoJugador', correo);
-
-  document.getElementById('form-container').style.display = 'none';
-
-  socket.emit('joinSala', { salaId, tipo, nombre, correo });
+  // 4) Reiniciar y arrancar la animación de la barra:
+  timerBar.style.transition = 'none';
+  timerBar.style.width      = '0%';
+  void timerBar.offsetWidth;  // fuerza reflow
+  timerBar.style.transition = `width ${duration}ms linear`;
+  timerBar.style.width      = '100%';
 });
 
-    document.getElementById('start-btn').addEventListener('click', () => {
-      socket.emit('startJuego', {
-        salaId,
-        tiempoPorRonda: 15,
-        preguntas: [
-          { id: 'p1', texto: '¿Qué preferís?', opcion1: 'Pizza', opcion2: 'Hamburguesa' },
-          { id: 'p2', texto: '¿Frío o calor?', opcion1: 'Invierno', opcion2: 'Verano' }
-        ]
-      });
-    });
 
-    socket.on('preguntaNueva', (data) => {
-      preguntaActual = data;
-      yaVotado = false;
-      document.getElementById('question-text').textContent = data.texto;
-      document.getElementById('question-index').textContent = data.preguntaId;
-      document.getElementById('option0').textContent = data.opcion1;
-      document.getElementById('option1').textContent = data.opcion2;
-      startTimer(data.timer);
-    });
-
-    document.getElementById('option0').addEventListener('click', () => votar('op1'));
-    document.getElementById('option1').addEventListener('click', () => votar('op2'));
-
-    function votar(opcion) {
-      if (yaVotado || tipo === 'master') return;
-      yaVotado = true;
-      socket.emit('votar', {
-        salaId,
-        jugadorId: socket.id,
-        preguntaId: preguntaActual.preguntaId,
-        opcionElegida: opcion
-      });
+socket.on('respuestaCorrecta', ({ correctIndex }) => {
+  clearTimeout(timerAnim);
+  opts.forEach((el, i) => {
+    if (i === correctIndex) {
+      el.style.background  = optionColors[i];
+      el.style.borderColor = optionColors[i];
     }
+  });
+  overlayAnim = setTimeout(() => {
+    opts.forEach(el => {
+      el.style.background  = '#2a2a2a';
+      el.style.borderColor = 'transparent';
+    });
+  }, duration);
+});
 
-    socket.on('actualizarVotos', ({ conteo }) => {
-      const total = conteo.op1 + conteo.op2 || 1;
-      const p1 = Math.round((conteo.op1 / total) * 100);
-      const p2 = Math.round((conteo.op2 / total) * 100);
-      document.getElementById('option0').textContent += ` (${p1}%)`;
-      document.getElementById('option1').textContent += ` (${p2}%)`;
+
+    // Siguiente pregunta
+    socket.on('siguientePregunta', () => {
+      clearTimeout(overlayAnim);
+      overlay.style.display = 'flex';
+      overlay.textContent = 'Siguiente pregunta';
+      overlayAnim = setTimeout(() => overlay.style.display = 'none', duration);
     });
 
-    function startTimer(segundos) {
-      const bar = document.getElementById('timer-bar');
-      bar.style.width = '0%';
-      let tiempo = 0;
-      const intervalo = setInterval(() => {
-        tiempo++;
-        bar.style.width = `${(tiempo / segundos) * 100}%`;
-        if (tiempo >= segundos) {
-          clearInterval(intervalo);
-        }
-      }, 1000);
-    }
+    // Fin de juego
+    socket.on('terminarJuego', () => {
+      clearTimeout(overlayAnim);
+      overlay.style.display = 'flex';
+      overlay.textContent = '¡Fin del juego!';
+    });
+
+    document.addEventListener('keydown', e => {
+  if (e.key === '1') {
+    // Emitir reset al servidor
+    const sala = salaIdInput.value.trim();
+    socket.emit('resetGame', { salaId: sala });
+    // Reiniciar tu UI local
+    showConfig();
+  }
+});
+
+
+    // Reconexión automática
+    socket.on('connect', () => {
+      const sala = salaInput.value.trim();
+      socket.emit('joinSala', { salaId: sala, tipo: 'master' });
+    });
   </script>
 </body>
 </html>

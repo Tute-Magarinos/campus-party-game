@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jugador - Campus Party Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; font-family: Arial, sans-serif; }
+    .mobile-container { width: 90%; max-width: 400px; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; transition: background 0.3s; }
+    #player-form, #waiting-screen, #answer-buttons { display: none; }
+    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+    button { width: 48%; padding: 15px; margin: 5px 1%; font-size: 1.2rem; border: none; border-radius: 8px; color: #fff; cursor: pointer; }
+    #btn0 { background: #FF5722; }
+    #btn1 { background: #2196F3; }
+    #btn2 { background: #CFFE47; color: #333; }
+    #btn3 { background: #FFEB3B; color: #333; }
+    #btnStart { background: #4caf50; width: 100%; }
+    #waiting-screen p { font-size: 1.2rem; margin: 20px 0; }
+    .feedback { font-size: 1.5rem; font-weight: bold; margin-top: 20px; display: none; }
+    .correct { color: #4caf50; }
+    .wrong   { color: #f44336; }
+  </style>
+  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+  <div class="mobile-container">
+    <div id="player-form">
+      <input id="player-name" type="text" placeholder="Tu nombre" />
+      <input id="player-email" type="email" placeholder="Tu correo" />
+      <button id="btnStart">Unirme al juego</button>
+    </div>
+    <div id="waiting-screen">
+      <p id="waiting-text">Escanea el QR o espera la pregunta...</p>
+    </div>
+    <!-- Pregunta en móvil -->
+    <div id="question-text-mobile" style="font-size:1.2rem; margin:15px 0; display:none;"></div>
+    <div id="answer-buttons">
+      <button id="btn0">A</button>
+      <button id="btn1">B</button>
+      <button id="btn2">C</button>
+      <button id="btn3">D</button>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+  <script>
+    const socket = io('http://localhost:3000');
+    const salaId = new URLSearchParams(window.location.search).get('salaId') || 'sala1';
+    const container = document.querySelector('.mobile-container');
+    const formEl = document.getElementById('player-form');
+    const waitEl = document.getElementById('waiting-screen');
+    const buttonsEl = document.getElementById('answer-buttons');
+    const feedbackEl = document.getElementById('feedback');
+    const waitText = document.getElementById('waiting-text');
+    const nameInput = document.getElementById('player-name');
+    const emailInput = document.getElementById('player-email');
+    const btnStart = document.getElementById('btnStart');
+    const optionButtons = [0,1,2,3].map(i => document.getElementById('btn'+i));
+
+    // Registrar jugador
+    function register(name, email) {
+      socket.emit('joinSala', { salaId, tipo: 'jugador' });
+      socket.emit('registerPlayer', { salaId, name, email });
+      formEl.style.display = 'none';
+      waitEl.style.display = 'block';
+      waitText.textContent = 'Esperando a que inicie la pregunta...';
+    }
+
+    // Comprobar localStorage
+    const storedName = localStorage.getItem('playerName');
+    const storedEmail = localStorage.getItem('playerEmail');
+    if (storedName && storedEmail) {
+      register(storedName, storedEmail);
+    } else {
+      formEl.style.display = 'block';
+    }
+
+    btnStart.onclick = () => {
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      if (!name || !email) return alert('Ingresa nombre y correo');
+      localStorage.setItem('playerName', name);
+      localStorage.setItem('playerEmail', email);
+      register(name, email);
+    };
+
+    socket.on('preguntaNueva', ({ preguntaIndex, questionText, options }) => {
+  // Sólo si ya te registraste
+  if (!localStorage.getItem('playerName')) return;
+
+  // Luego el resto de tu lógica para las opciones
+  waitEl.style.display = 'none';
+  buttonsEl.style.display = 'block';
+  feedbackEl.style.display = 'none';
+  options.forEach((text, i) => {
+    const btn = optionButtons[i];
+    btn.textContent = text;
+    btn.disabled = false;
+    btn.style.opacity = 1;
+    btn.onclick = () => selectOption(i);
+  });
+
+  // Restaurar fondo en blanco por si quedó coloreado
+  container.style.background = '#fff';
+});
+
+
+    function selectOption(index) {
+      optionButtons.forEach(b => b.disabled = true);
+      socket.emit('votar', { salaId, opcionElegida: index });
+      buttonsEl.style.display = 'none';
+      waitEl.style.display = 'block';
+      waitText.textContent = 'Esperando resultados...';
+    }
+
+    // Resultado individual
+    socket.on('resultadoJugador', ({ correct }) => {
+      waitEl.style.display = 'none';
+      feedbackEl.style.display = 'block';
+      feedbackEl.textContent = correct ? '¡Correcto!' : 'Incorrecto';
+      feedbackEl.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+      container.style.background = correct ? '#C8E6C9' : '#FFCDD2';
+      setTimeout(() => {
+        container.style.background = '#fff';
+        feedbackEl.style.display = 'none';
+      }, 2000);
+    });
+
+    // Siguiente pregunta
+    socket.on('siguientePregunta', () => {
+      buttonsEl.style.display = 'none';
+      waitEl.style.display = 'block';
+      waitText.textContent = 'Siguiente pregunta';
+    });
+
+    // Fin del juego
+    socket.on('terminarJuego', () => {
+      buttonsEl.style.display = 'none';
+      waitEl.style.display = 'block';
+      waitText.textContent = 'Juego finalizado. ¡Gracias por participar!';
+    });
+
+    // Reset desde servidor
+    socket.on('resetClient', () => {
+      buttonsEl.style.display = 'none';
+      feedbackEl.style.display = 'none';
+      waitEl.style.display = 'block';
+      waitText.textContent = 'Juego reiniciado';
+    });
+
+    // Reunirse al reconectar
+    socket.on('connect', () => {
+      if (localStorage.getItem('playerName')) {
+        register(localStorage.getItem('playerName'), localStorage.getItem('playerEmail'));
+      }
+    });
+  </script>
+</body>
+</html>
