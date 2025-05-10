@@ -3,8 +3,8 @@
 const { createClient } = require('@supabase/supabase-js');
 
 // Configura tus claves de Supabase
-const supabaseUrl = 'https://TU_PROYECTO.supabase.co'; // reemplaza esto
-const supabaseKey = 'TU_ANON_KEY'; // reemplaza esto
+const supabaseUrl = 'https://hubutcazejiyfdlkbbqu.supabase.co'; 
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YnV0Y2F6ZWppeWZkbGtiYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MDEzMDcsImV4cCI6MjA2MjQ3NzMwN30.jDC0dg9qvlDcdCYIRA4WslftXW6Ng8b7B9Rc4AZUaPQ';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 function setupSocket(io) {
