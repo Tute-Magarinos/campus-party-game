@@ -32,3 +32,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
+
+const supabaseUrl = 'https://hubutcazejiyfdlkbbqu.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YnV0Y2F6ZWppeWZkbGtiYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MDEzMDcsImV4cCI6MjA2MjQ3NzMwN30.jDC0dg9qvlDcdCYIRA4WslftXW6Ng8b7B9Rc4AZUaPQ';
+const supabase = createClient(supabaseUrl, supabaseKey);
