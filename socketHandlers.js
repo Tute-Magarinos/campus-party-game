@@ -19,22 +19,39 @@ function setupSocket(io) {
       socket.data.correo = correo || '';
 
       console.log(`🔗 ${tipo} unido a sala ${salaId} - ${nombre || ''}`);
+      console.log(`🔍 joinSala recibido:, ${ salaId, tipo, nombre, correo }`);
 
       // Insertar sala si no existe
       await supabase.from('salas').upsert({ id: salaId });
 
-      // Guardar jugador en Supabase con sala_id
-      const { data, error } = await supabase
-        .from('jugadores')
-        .insert({ nombre: socket.data.nombre, correo: socket.data.correo, socket_id: socket.id, sala_id: salaId })
-        .select()
-        .single();
+      console.log("🛬 joinSala recibido:", { salaId, tipo, nombre, correo });
 
-      if (error) {
-        console.error('Error al registrar jugador:', error.message);
-      } else {
-        socket.data.jugadorId = data.id;
-      }
+if (tipo === "jugador") {
+  console.log("📥 Intentando insertar jugador:", {
+    nombre: socket.data.nombre,
+    correo: socket.data.correo,
+    socket_id: socket.id,
+    sala_id: salaId
+  });
+
+  const { data, error } = await supabase
+    .from('jugadores')
+    .insert({
+      nombre: socket.data.nombre,
+      correo: socket.data.correo,
+      socket_id: socket.id,
+      sala_id: salaId
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('❌ Error al registrar jugador:', error.message);
+  } else {
+    socket.data.jugadorId = data.id;
+    console.log('✅ Jugador insertado correctamente:', data);
+  }
+}
 
       // Si hay pregunta activa, enviársela al jugador nuevo
       const sala = salas[salaId];
@@ -95,13 +112,22 @@ function setupSocket(io) {
       // Guardar respuesta en Supabase si el jugador está registrado
       if (socket.data.jugadorId) {
         const preguntaTexto = sala.preguntaActual.question;
+        console.log("📤 Insertando respuesta:", {
+          jugador_id: socket.data.jugadorId,
+          pregunta: preguntaTexto,
+          opcion: opcionElegida
+        });
+
         const { error } = await supabase.from('respuestas').insert({
           jugador_id: socket.data.jugadorId,
           pregunta: preguntaTexto,
           opcion: opcionElegida
         });
+
         if (error) {
-          console.error('Error al guardar respuesta:', error.message);
+          console.error('❌ Error al guardar respuesta:', error.message);
+        } else {
+          console.log("✅ Respuesta guardada correctamente");
         }
       }
     });
