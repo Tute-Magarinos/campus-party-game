@@ -2,11 +2,6 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-<<<<<<< HEAD
-const cors = require('cors');
-const setupSocket = require('./socketHandlers');
-=======
->>>>>>> Avances-Gonza
 const path = require('path');
 
 const app = express();
@@ -106,12 +101,6 @@ function nextTurn(salaId) {
   room.timeouts.answerTimeout = setTimeout(() => showAnswer(salaId), QUESTION_DURATION);
 }
 
-<<<<<<< HEAD
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});
-=======
 function showAnswer(salaId) {
   const room = rooms[salaId];
   if (!room) return;
@@ -131,4 +120,3 @@ function showAnswer(salaId) {
 }
 
 server.listen(3000, () => console.log('Servidor escuchando en puerto 3000'));
->>>>>>> Avances-Gonza
