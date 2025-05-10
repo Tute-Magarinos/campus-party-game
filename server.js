@@ -119,4 +119,4 @@ function showAnswer(salaId) {
   }, ANSWER_DURATION);
 }
 
-server.listen(3000, () => console.log('Servidor escuchando en puerto 3000'));
+server.listen(3000, () => console.log('http://localhost:3000/'));

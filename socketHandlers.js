@@ -1,9 +1,8 @@
-// socketHandlers.js con integración a Supabase y tracking por sala
-
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = 'https://hubutcazejiyfdlkbbqu.supabase.co'; 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YnV0Y2F6ZWppeWZkbGtiYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5MDEzMDcsImV4cCI6MjA2MjQ3NzMwN30.jDC0dg9qvlDcdCYIRA4WslftXW6Ng8b7B9Rc4AZUaPQ';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 function setupSocket(io) {
@@ -111,9 +110,3 @@ function setupSocket(io) {
 }
 
 module.exports = setupSocket;
-
-
-//@Campusbanana = clave databse
-//https://hubutcazejiyfdlkbbqu.supabase.co  = url database 
-/*" eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YnV0Y2F6ZWppeWZkbGtiYnF1Iiwicm9sZSI6ImF
-  ub24iLCJpYXQiOjE3NDY5MDEzMDcsImV4cCI6MjA2MjQ3NzMwN30.jDC0dg9qvlDcdCYIRA4WslftXW6Ng8b7B9Rc4AZUaPQ   "= supbasekey */
