@@ -91,6 +91,11 @@
     let duration, timerAnim, overlayAnim;
     const socket = io();
 
+    socket.on("connect", () => {
+  const sala = salaInput.value.trim();
+  socket.emit("joinSala", { salaId: sala, tipo: "master" });
+});
+
     // Cargar preguntas desde JSON
     fetch(qsUrl)
       .then(res => res.json())
@@ -132,6 +137,7 @@
       clearTimeout(overlayAnim);
       const sala = startBtn.dataset.sala;
       const qCount = parseInt(startBtn.dataset.qCount,10);
+      socket.emit("joinSala", { salaId: sala, tipo: "master" });
       socket.emit('startGame', { salaId: sala, questionCount: qCount });
       lobbySection.classList.remove('active');
       gameSection.classList.add('active');

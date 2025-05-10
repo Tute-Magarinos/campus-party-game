@@ -19,49 +19,36 @@ function setupSocket(io) {
       socket.data.correo = correo || '';
 
       console.log(`🔗 ${tipo} unido a sala ${salaId} - ${nombre || ''}`);
-      console.log(`🔍 joinSala recibido:, ${ salaId, tipo, nombre, correo }`);
 
-      // Insertar sala si no existe
       await supabase.from('salas').upsert({ id: salaId });
 
-      console.log("🛬 joinSala recibido:", { salaId, tipo, nombre, correo });
+      if (tipo === 'jugador') {
+        const { data, error } = await supabase
+          .from('jugadores')
+          .insert({ nombre: socket.data.nombre, correo: socket.data.correo, socket_id: socket.id, sala_id: salaId })
+          .select()
+          .single();
 
-if (tipo === "jugador") {
-  console.log("📥 Intentando insertar jugador:", {
-    nombre: socket.data.nombre,
-    correo: socket.data.correo,
-    socket_id: socket.id,
-    sala_id: salaId
-  });
+        if (error) {
+          console.error('❌ Error al registrar jugador:', error.message);
+        } else {
+          socket.data.jugadorId = data.id;
+          console.log('✅ Jugador insertado correctamente:', data);
+        }
+      }
 
-  const { data, error } = await supabase
-    .from('jugadores')
-    .insert({
-      nombre: socket.data.nombre,
-      correo: socket.data.correo,
-      socket_id: socket.id,
-      sala_id: salaId
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('❌ Error al registrar jugador:', error.message);
-  } else {
-    socket.data.jugadorId = data.id;
-    console.log('✅ Jugador insertado correctamente:', data);
-  }
-}
-
-      // Si hay pregunta activa, enviársela al jugador nuevo
       const sala = salas[salaId];
       if (sala && sala.preguntaActual) {
         socket.emit('preguntaNueva', sala.preguntaActual);
       }
     });
 
-    socket.on('startJuego', ({ salaId, tiempoPorRonda, preguntas }) => {
+    socket.on('startGame', ({ salaId, questionCount }) => {
       console.log(`🎮 Juego iniciado en ${salaId}`);
+
+      const rawQuestions = require('./public/questions.json');
+      const shuffled = [...rawQuestions].sort(() => 0.5 - Math.random());
+      const preguntas = shuffled.slice(0, questionCount);
 
       let index = 0;
 
@@ -73,50 +60,49 @@ if (tipo === "jugador") {
 
         const pregunta = preguntas[index];
 
-        // Guardar formato consistente en la sala
         const preguntaFormateada = {
-          preguntaId: pregunta.id,
+          preguntaId: pregunta.id || index,
           question: pregunta.question,
-          answer1: pregunta.answer1,
-          answer2: pregunta.answer2,
-          answer3: pregunta.answer3,
-          answer4: pregunta.answer4,
-          timer: tiempoPorRonda
+          preguntaIndex: index,
+          preguntaText: pregunta.question,
+          options: [
+            pregunta.answer1,
+            pregunta.answer2,
+            pregunta.answer3,
+            pregunta.answer4
+          ],
+          timer: 15000
         };
 
         salas[salaId] = {
           votos: {},
-          preguntaId: pregunta.id,
-          preguntaActual: preguntaFormateada
+          preguntaId: preguntaFormateada.preguntaId,
+          preguntaActual: preguntaFormateada,
+          preguntas,
+          currentIndex: index,
+          inProgress: true
         };
 
-        // Enviar la pregunta a todos los jugadores
         io.to(salaId).emit('preguntaNueva', preguntaFormateada);
 
         setTimeout(() => {
           index++;
           enviarPregunta();
-        }, tiempoPorRonda * 1000);
+        }, 15000);
       }
 
       enviarPregunta();
     });
 
-    socket.on('votar', async ({ salaId, jugadorId, preguntaId, opcionElegida }) => {
+    socket.on('votar', async ({ salaId, preguntaId, opcionElegida }) => {
       const sala = salas[salaId];
-      if (!sala || sala.preguntaId !== preguntaId) return;
+      if (!sala || !sala.inProgress || sala.preguntaId !== preguntaId) return;
 
-      sala.votos[opcionElegida] = (sala.votos[opcionElegida] || 0) + 1;
+      sala.votos[socket.id] = opcionElegida;
       io.to(salaId).emit('votosActualizados', sala.votos);
 
-      // Guardar respuesta en Supabase si el jugador está registrado
       if (socket.data.jugadorId) {
         const preguntaTexto = sala.preguntaActual.question;
-        console.log("📤 Insertando respuesta:", {
-          jugador_id: socket.data.jugadorId,
-          pregunta: preguntaTexto,
-          opcion: opcionElegida
-        });
 
         const { error } = await supabase.from('respuestas').insert({
           jugador_id: socket.data.jugadorId,
@@ -129,6 +115,14 @@ if (tipo === "jugador") {
         } else {
           console.log("✅ Respuesta guardada correctamente");
         }
+      }
+    });
+
+    socket.on('resetGame', ({ salaId }) => {
+      if (salas[salaId]) {
+        delete salas[salaId];
+        io.to(salaId).emit('resetClient');
+        console.log(`🔁 Juego reiniciado en sala ${salaId}`);
       }
     });
 
