@@ -36,6 +36,7 @@ function setupSocket(io) {
         socket.data.jugadorId = data.id;
       }
 
+      // Si hay pregunta activa, enviársela al jugador nuevo
       const sala = salas[salaId];
       if (sala && sala.preguntaActual) {
         socket.emit('preguntaNueva', sala.preguntaActual);
@@ -46,6 +47,7 @@ function setupSocket(io) {
       console.log(`🎮 Juego iniciado en ${salaId}`);
 
       let index = 0;
+
       function enviarPregunta() {
         if (index >= preguntas.length) {
           io.to(salaId).emit('terminarJuego', { mensaje: 'Fin del juego' });
@@ -53,25 +55,26 @@ function setupSocket(io) {
         }
 
         const pregunta = preguntas[index];
+
+        // Guardar formato consistente en la sala
+        const preguntaFormateada = {
+          preguntaId: pregunta.id,
+          question: pregunta.question,
+          answer1: pregunta.answer1,
+          answer2: pregunta.answer2,
+          answer3: pregunta.answer3,
+          answer4: pregunta.answer4,
+          timer: tiempoPorRonda
+        };
+
         salas[salaId] = {
           votos: {},
           preguntaId: pregunta.id,
-          preguntaActual: {
-            preguntaId: pregunta.id,
-            texto: pregunta.texto,
-            opcion1: pregunta.opcion1,
-            opcion2: pregunta.opcion2,
-            timer: tiempoPorRonda
-          }
+          preguntaActual: preguntaFormateada
         };
 
-        io.to(salaId).emit('preguntaNueva', {
-          preguntaId: pregunta.id,
-          texto: pregunta.texto,
-          opcion1: pregunta.opcion1,
-          opcion2: pregunta.opcion2,
-          timer: tiempoPorRonda
-        });
+        // Enviar la pregunta a todos los jugadores
+        io.to(salaId).emit('preguntaNueva', preguntaFormateada);
 
         setTimeout(() => {
           index++;
@@ -91,7 +94,7 @@ function setupSocket(io) {
 
       // Guardar respuesta en Supabase si el jugador está registrado
       if (socket.data.jugadorId) {
-        const preguntaTexto = sala.preguntaActual.texto;
+        const preguntaTexto = sala.preguntaActual.question;
         const { error } = await supabase.from('respuestas').insert({
           jugador_id: socket.data.jugadorId,
           pregunta: preguntaTexto,

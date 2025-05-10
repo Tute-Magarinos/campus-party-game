@@ -6,153 +6,176 @@
   <title>Jugador - Campus Party Game</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; font-family: Arial, sans-serif; }
-    .mobile-container { width: 90%; max-width: 400px; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; transition: background 0.3s; }
-    #player-form, #waiting-screen, #answer-buttons { display: none; }
-    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-    button { width: 48%; padding: 15px; margin: 5px 1%; font-size: 1.2rem; border: none; border-radius: 8px; color: #fff; cursor: pointer; }
-    #btn0 { background: #FF5722; }
-    #btn1 { background: #2196F3; }
-    #btn2 { background: #CFFE47; color: #333; }
-    #btn3 { background: #FFEB3B; color: #333; }
-    #btnStart { background: #4caf50; width: 100%; }
-    #waiting-screen p { font-size: 1.2rem; margin: 20px 0; }
-    .feedback { font-size: 1.5rem; font-weight: bold; margin-top: 20px; display: none; }
-    .correct { color: #4caf50; }
-    .wrong   { color: #f44336; }
+    body {
+      font-family:'Segoe UI', Tahoma, sans-serif;
+      background:#121212;
+      color:#fff;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .mobile-container {
+      width: 90%;
+      max-width: 600px;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    #player-form input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #2a2a2a;
+      color: #fff;
+    }
+    #player-form button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 6px;
+      background: #CFFE47;
+      color: #000;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    #player-form button:hover {
+      background: #b5e23d;
+    }
+    #waiting-screen {
+      display: none;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      color: #ddd;
+    }
+    #question-text-mobile {
+      display: none;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 8px;
+      color: #fff;
+    }
+    #answer-buttons button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #2a2a2a;
+      color: #fff;
+      transition: background 0.3s, border-color 0.3s;
+      border: 2px solid transparent;
+    }
+    #answer-buttons button:hover {
+      background-color: #333;
+      border-color: #CFFE47;
+    }
   </style>
-  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <div class="mobile-container">
     <div id="player-form">
       <input id="player-name" type="text" placeholder="Tu nombre" />
       <input id="player-email" type="email" placeholder="Tu correo" />
+      <input id="player-sala" type="text" placeholder="ID de sala" />
       <button id="btnStart">Unirme al juego</button>
     </div>
+
     <div id="waiting-screen">
-      <p id="waiting-text">Escanea el QR o espera la pregunta...</p>
+      <p>Esperando que comience el juego...</p>
     </div>
-    <!-- Pregunta en móvil -->
-    <div id="question-text-mobile" style="font-size:1.2rem; margin:15px 0; display:none;"></div>
-    <div id="answer-buttons">
-      <button id="btn0">A</button>
-      <button id="btn1">B</button>
-      <button id="btn2">C</button>
-      <button id="btn3">D</button>
-      <div class="feedback" id="feedback"></div>
-    </div>
+
+    <div id="question-text-mobile"></div>
+    <div id="answer-buttons"></div>
   </div>
+
   <script>
-    const socket = io('http://localhost:3000');
-    const salaId = new URLSearchParams(window.location.search).get('salaId') || 'sala1';
-    const container = document.querySelector('.mobile-container');
-    const formEl = document.getElementById('player-form');
-    const waitEl = document.getElementById('waiting-screen');
-    const buttonsEl = document.getElementById('answer-buttons');
-    const feedbackEl = document.getElementById('feedback');
-    const waitText = document.getElementById('waiting-text');
-    const nameInput = document.getElementById('player-name');
-    const emailInput = document.getElementById('player-email');
-    const btnStart = document.getElementById('btnStart');
-    const optionButtons = [0,1,2,3].map(i => document.getElementById('btn'+i));
+    const socket = io();
+    let salaId = null;
+    let preguntaId = null;
 
-    // Registrar jugador
-    function register(name, email) {
-      socket.emit('joinSala', { salaId, tipo: 'jugador' });
-      socket.emit('registerPlayer', { salaId, name, email });
-      formEl.style.display = 'none';
-      waitEl.style.display = 'block';
-      waitText.textContent = 'Esperando a que inicie la pregunta...';
-    }
+    const form = document.getElementById("player-form");
+    const waiting = document.getElementById("waiting-screen");
+    const nameInput = document.getElementById("player-name");
+    const emailInput = document.getElementById("player-email");
+    const salaInput = document.getElementById("player-sala");
+    const questionText = document.getElementById("question-text-mobile");
+    const answerButtons = document.getElementById("answer-buttons");
 
-    // Comprobar localStorage
-    const storedName = localStorage.getItem('playerName');
-    const storedEmail = localStorage.getItem('playerEmail');
-    if (storedName && storedEmail) {
-      register(storedName, storedEmail);
-    } else {
-      formEl.style.display = 'block';
-    }
+    const params = new URLSearchParams(window.location.search);
+    const salaParam = params.get("salaId");
+    if (salaParam) salaInput.value = salaParam;
 
-    btnStart.onclick = () => {
-      const name = nameInput.value.trim();
-      const email = emailInput.value.trim();
-      if (!name || !email) return alert('Ingresa nombre y correo');
-      localStorage.setItem('playerName', name);
-      localStorage.setItem('playerEmail', email);
-      register(name, email);
+    document.getElementById("btnStart").onclick = () => {
+      const nombre = nameInput.value.trim();
+      const correo = emailInput.value.trim();
+      salaId = salaInput.value.trim();
+
+      if (!nombre || !correo || !salaId) {
+        alert("Por favor completá todos los campos.");
+        return;
+      }
+
+      socket.emit("joinSala", {
+        salaId,
+        tipo: "jugador",
+        nombre,
+        correo
+      });
+
+      form.style.display = "none";
+      waiting.style.display = "block";
     };
 
-    socket.on('preguntaNueva', ({ preguntaIndex, questionText, options }) => {
-  // Sólo si ya te registraste
-  if (!localStorage.getItem('playerName')) return;
+    socket.on("preguntaNueva", (data) => {
+      console.log("🟨 Recibida preguntaNueva:", data);
+      preguntaId = data.preguntaId;
+      waiting.style.display = "none";
+      questionText.style.display = "block";
+      questionText.innerText = data.preguntaText || data.question || data.texto || "Pregunta sin texto";
 
-  // Luego el resto de tu lógica para las opciones
-  waitEl.style.display = 'none';
-  buttonsEl.style.display = 'block';
-  feedbackEl.style.display = 'none';
-  options.forEach((text, i) => {
-    const btn = optionButtons[i];
-    btn.textContent = text;
-    btn.disabled = false;
-    btn.style.opacity = 1;
-    btn.onclick = () => selectOption(i);
-  });
+      answerButtons.innerHTML = "";
+      answerButtons.style.display = "block";
 
-  // Restaurar fondo en blanco por si quedó coloreado
-  container.style.background = '#fff';
-});
+      const opciones = data.options || [
+        data.answer1,
+        data.answer2,
+        data.answer3,
+        data.answer4
+      ].filter(Boolean);
 
-
-    function selectOption(index) {
-      optionButtons.forEach(b => b.disabled = true);
-      socket.emit('votar', { salaId, opcionElegida: index });
-      buttonsEl.style.display = 'none';
-      waitEl.style.display = 'block';
-      waitText.textContent = 'Esperando resultados...';
-    }
-
-    // Resultado individual
-    socket.on('resultadoJugador', ({ correct }) => {
-      waitEl.style.display = 'none';
-      feedbackEl.style.display = 'block';
-      feedbackEl.textContent = correct ? '¡Correcto!' : 'Incorrecto';
-      feedbackEl.className = 'feedback ' + (correct ? 'correct' : 'wrong');
-      container.style.background = correct ? '#C8E6C9' : '#FFCDD2';
-      setTimeout(() => {
-        container.style.background = '#fff';
-        feedbackEl.style.display = 'none';
-      }, 2000);
+      opciones.forEach((opcion, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = opcion;
+        btn.id = "btn" + index;
+        btn.onclick = () => {
+          socket.emit("votar", {
+            salaId,
+            preguntaId,
+            opcionElegida: opcion
+          });
+          questionText.innerText = "✅ ¡Respuesta enviada!";
+          answerButtons.innerHTML = "";
+        };
+        answerButtons.appendChild(btn);
+      });
     });
 
-    // Siguiente pregunta
-    socket.on('siguientePregunta', () => {
-      buttonsEl.style.display = 'none';
-      waitEl.style.display = 'block';
-      waitText.textContent = 'Siguiente pregunta';
-    });
-
-    // Fin del juego
-    socket.on('terminarJuego', () => {
-      buttonsEl.style.display = 'none';
-      waitEl.style.display = 'block';
-      waitText.textContent = 'Juego finalizado. ¡Gracias por participar!';
-    });
-
-    // Reset desde servidor
-    socket.on('resetClient', () => {
-      buttonsEl.style.display = 'none';
-      feedbackEl.style.display = 'none';
-      waitEl.style.display = 'block';
-      waitText.textContent = 'Juego reiniciado';
-    });
-
-    // Reunirse al reconectar
-    socket.on('connect', () => {
-      if (localStorage.getItem('playerName')) {
-        register(localStorage.getItem('playerName'), localStorage.getItem('playerEmail'));
-      }
+    socket.on("votosActualizados", (votos) => {
+      console.log("📊 Votos:", votos);
     });
   </script>
 </body>
