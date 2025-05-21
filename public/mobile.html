@@ -115,20 +115,21 @@
     const questionText = document.getElementById("question-text-mobile");
     const answerButtons = document.getElementById("answer-buttons");
 
-    const params = new URLSearchParams(window.location.search);
-    const salaParam = params.get("salaId");
-    if (salaParam) salaInput.value = salaParam;
-
-    const nombreGuardado = localStorage.getItem("jugador_nombre");
+    
+   const nombreGuardado = localStorage.getItem("jugador_nombre");
 const correoGuardado = localStorage.getItem("jugador_correo");
-const salaGuardada = localStorage.getItem("jugador_sala");
+const salaParam = new URLSearchParams(window.location.search).get("salaId");
 
+
+if (salaParam) {
+  localStorage.setItem("jugador_sala", salaParam); // actualizar si viene por URL
+}
+const salaGuardada = salaParam || localStorage.getItem("jugador_sala");
 if (nombreGuardado && correoGuardado && salaGuardada) {
   nameInput.value = nombreGuardado;
   emailInput.value = correoGuardado;
   salaInput.value = salaGuardada;
 
-  // Emitir automáticamente
   socket.emit("joinSala", {
     salaId: salaGuardada,
     tipo: "jugador",
@@ -139,7 +140,6 @@ if (nombreGuardado && correoGuardado && salaGuardada) {
   form.style.display = "none";
   waiting.style.display = "block";
 }
-
     document.getElementById("btnStart").onclick = () => {
       const nombre = nameInput.value.trim();
       const correo = emailInput.value.trim();
@@ -188,11 +188,12 @@ socket.emit("joinSala", {
         btn.innerText = opcion;
         btn.id = "btn" + index;
         btn.onclick = () => {
-          socket.emit("votar", {
-            salaId,
-            preguntaId,
-            opcionElegida: opcion
-          });
+  socket.emit("votar", {
+    salaId,
+    preguntaId,
+    opcionElegida: opcion,
+    opcionIndex: index  // 👈 enviar el índice
+  });
           questionText.innerText = "✅ ¡Respuesta enviada!";
           answerButtons.innerHTML = "";
         };
