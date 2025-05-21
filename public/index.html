@@ -151,9 +151,10 @@
 
   // 2) Asignar las respuestas SIN tocar el JSON local de preguntas:
   opts.forEach((el, i) => {
-    el.textContent = options[i];
-    el.style.background   = '#2a2a2a';
-    el.style.borderColor  = optionColors[i];
+  el.textContent     = options[i];
+  el.style.background = '#2a2a2a';
+  el.style.borderColor = optionColors[i];
+  el.style.opacity = '1';
   });
 
   // 3) Si quieres seguir mostrando el texto de la pregunta desde tu JSON local:
@@ -173,14 +174,17 @@ socket.on('respuestaCorrecta', ({ correctIndex }) => {
   clearTimeout(timerAnim);
   opts.forEach((el, i) => {
     if (i === correctIndex) {
-      el.style.background  = optionColors[i];
+      el.style.background = optionColors[i];
       el.style.borderColor = optionColors[i];
+    } else {
+      el.style.opacity = '0.4';
     }
   });
   overlayAnim = setTimeout(() => {
     opts.forEach(el => {
-      el.style.background  = '#2a2a2a';
+      el.style.background = '#2a2a2a';
       el.style.borderColor = 'transparent';
+      el.style.opacity = '1';
     });
   }, duration);
 });

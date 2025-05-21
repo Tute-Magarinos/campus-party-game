@@ -173,10 +173,18 @@
         answerButtons.appendChild(btn);
       });
     });
+    
 
     socket.on("votosActualizados", (votos) => {
       console.log("📊 Votos:", votos);
     });
+    
+    socket.on("resultadoJugador", ({ correct }) => {
+  questionText.innerText = correct
+    ? "✅ ¡Correcto!"
+    : "❌ Incorrecto";
+  answerButtons.innerHTML = "";
+});
   </script>
 </body>
 </html>

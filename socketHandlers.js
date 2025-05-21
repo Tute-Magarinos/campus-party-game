@@ -85,10 +85,30 @@ function setupSocket(io) {
 
         io.to(salaId).emit('preguntaNueva', preguntaFormateada);
 
-        setTimeout(() => {
-          index++;
-          enviarPregunta();
-        }, 15000);
+       setTimeout(() => {
+  const pregunta = preguntas[index];
+  const correctIndex = pregunta.correct;
+
+  // Emitir a todos cuál es la correcta (para el master)
+  io.to(salaId).emit('respuestaCorrecta', { correctIndex });
+
+  // Accedemos a la sala actual
+  const sala = salas[salaId];
+
+  // Emitir a cada jugador si respondió correctamente
+  Object.keys(sala.votos).forEach(socketId => {
+    const respuestaJugador = sala.votos[socketId];
+    const esCorrecta = (respuestaJugador === pregunta[`answer${correctIndex + 1}`]);
+
+    io.to(socketId).emit('resultadoJugador', { correct: esCorrecta });
+  });
+
+  // Esperar 4 segundos antes de pasar a la siguiente
+  setTimeout(() => {
+    index++;
+    enviarPregunta();
+  }, 4000);
+}, 15000);
       }
 
       enviarPregunta();
