@@ -119,6 +119,27 @@
     const salaParam = params.get("salaId");
     if (salaParam) salaInput.value = salaParam;
 
+    const nombreGuardado = localStorage.getItem("jugador_nombre");
+const correoGuardado = localStorage.getItem("jugador_correo");
+const salaGuardada = localStorage.getItem("jugador_sala");
+
+if (nombreGuardado && correoGuardado && salaGuardada) {
+  nameInput.value = nombreGuardado;
+  emailInput.value = correoGuardado;
+  salaInput.value = salaGuardada;
+
+  // Emitir automáticamente
+  socket.emit("joinSala", {
+    salaId: salaGuardada,
+    tipo: "jugador",
+    nombre: nombreGuardado,
+    correo: correoGuardado
+  });
+
+  form.style.display = "none";
+  waiting.style.display = "block";
+}
+
     document.getElementById("btnStart").onclick = () => {
       const nombre = nameInput.value.trim();
       const correo = emailInput.value.trim();
@@ -129,12 +150,17 @@
         return;
       }
 
-      socket.emit("joinSala", {
-        salaId,
-        tipo: "jugador",
-        nombre,
-        correo
-      });
+      localStorage.setItem("jugador_nombre", nombre);
+localStorage.setItem("jugador_correo", correo);
+localStorage.setItem("jugador_sala", salaId);
+
+// Emitir al servidor
+socket.emit("joinSala", {
+  salaId,
+  tipo: "jugador",
+  nombre,
+  correo
+});
 
       form.style.display = "none";
       waiting.style.display = "block";

@@ -85,29 +85,41 @@ function setupSocket(io) {
 
         io.to(salaId).emit('preguntaNueva', preguntaFormateada);
 
-       setTimeout(() => {
+       setTimeout(async () => {
   const pregunta = preguntas[index];
   const correctIndex = pregunta.correct;
+  const sala = salas[salaId];
 
   // Emitir a todos cuál es la correcta (para el master)
   io.to(salaId).emit('respuestaCorrecta', { correctIndex });
 
-  // Accedemos a la sala actual
-  const sala = salas[salaId];
+  // Obtener todos los sockets conectados a la sala
+  const socketsEnSala = await io.in(salaId).fetchSockets();
 
   // Emitir a cada jugador si respondió correctamente
-  Object.keys(sala.votos).forEach(socketId => {
-    const respuestaJugador = sala.votos[socketId];
-    const esCorrecta = (respuestaJugador === pregunta[`answer${correctIndex + 1}`]);
+  for (const sock of socketsEnSala) {
+    const respuestaJugador = sala.votos[sock.id];
+    const respondio = respuestaJugador !== undefined;
+    const esCorrecta = respondio && respuestaJugador === pregunta[`answer${correctIndex + 1}`];
 
-    io.to(socketId).emit('resultadoJugador', { correct: esCorrecta });
-  });
+    sock.emit('resultadoJugador', { correct: esCorrecta });
 
-  // Esperar 4 segundos antes de pasar a la siguiente
+    // (opcional) Guardar en Supabase que no respondió
+    if (!respondio && sock.data?.jugadorId) {
+      await supabase.from('respuestas').insert({
+        jugador_id: sock.data.jugadorId,
+        pregunta: pregunta.question,
+        opcion: '[No respondió]'
+      });
+    }
+  }
+
+  // Esperar unos segundos antes de pasar a la siguiente
   setTimeout(() => {
     index++;
     enviarPregunta();
   }, 4000);
+
 }, 15000);
       }
 
