@@ -4,32 +4,191 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Master - Campus Party Game</title>
-  <style>
-    /* CSS existente */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family:'Segoe UI', Tahoma,sans-serif; background:#121212; color:#fff; height:100vh; display:flex; align-items:center; justify-content:center; }
-    .screen { display:none; width:90%; max-width:600px; background:#1e1e1e; border-radius:12px; padding:30px; box-shadow:0 8px 16px rgba(0,0,0,0.5); text-align:center; }
-    .active { display:block; }
-    h2 { margin-bottom:20px; font-size:1.6rem; letter-spacing:1px; color:#CFFE47; }
-    .config label { display:block; text-align:left; margin:10px 0 5px; font-size:0.9rem; color:#bbb; }
-    .config input { width:calc(100% - 20px); padding:10px; margin-bottom:10px; font-size:1rem; border:1px solid #333; border-radius:6px; background:#2a2a2a; color:#fff; }
-    .config button { width:100%; padding:12px; font-size:1.1rem; border:none; border-radius:6px; background:#CFFE47; color:#000; cursor:pointer; margin-top:15px; transition:background .3s; }
-    .config button:hover { background:#b5e23d; }
-    .lobby p { font-size:1.1rem; margin-bottom:15px; color:#ddd; }
-    .lobby #qrCode { width:200px; height:200px; margin:0 auto 15px; display:none; border:4px solid #333; border-radius:8px; background:#fff; }
-    .lobby a { color:#CFFE47; word-break:break-all; display:none; margin-bottom:20px; }
-    .lobby button { padding:12px 20px; font-size:1.1rem; border:none; border-radius:6px; background:#CFFE47; color:#000; cursor:pointer; transition:background .3s; }
-    .lobby button:hover { background:#b5e23d; }
-    .game { position:relative; }
-    .game #timer-container { width:100%; height:8px; background:#333; border-radius:4px; overflow:hidden; margin-bottom:20px; }
-    .game #timer-bar { width:0; height:100%; background:#CFFE47; transition:width linear; }
-    .game #question-number { font-size:0.9rem; text-transform:uppercase; margin-bottom:8px; color:#bbb; }
-    .game #question-text { font-size:1.5rem; margin-bottom:20px; background:#2a2a2a; padding:15px; border-radius:8px; color:#fff; }
-    .game #options-container { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
-    .game .option { background:#2a2a2a; color:#fff; padding:15px; border-radius:8px; font-size:1rem; display:flex; align-items:center; justify-content:center; min-height:80px; border:3px solid transparent; transition:background .3s,border-color .3s; }
-    .game .option:hover { background:#333; }
-    #overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); color:#CFFE47; display:none; align-items:center; justify-content:center; font-size:2rem; border-radius:12px; }
-  </style>
+ <style>
+  * {
+    box-sizing: border-box;
+    margin: 0; 
+    padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans‐serif;
+    background: #ffffff;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .screen {
+    display: none;
+    width: 90%;
+    max-width: 600px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+  .active { display: block; }
+
+  .game {
+    position: relative;
+    background: #fff;          /* Fondo blanco detrás de todo */
+    color: #000;               /* Texto negro */
+  }
+  .game #timer-container {
+    width: 100%;
+    height: 8px;
+    background: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .game #timer-bar {
+    width: 0;
+    height: 100%;
+    background: #CFFE47;
+    transition: width linear;
+  }
+  .game #question-number {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: #555;
+  }
+  .game #question-text {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    background: #fff;
+    color: #000;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  /* Cuatro cajas de respuesta con borde de color */
+  .game #options-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .game .option {
+    background: #fff;
+    color: #000;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  #option0 { border-color: #FF5722; }
+  #option1 { border-color: #2196F3; }
+  #option2 { border-color: #CFFE47; }
+  #option3 { border-color: #FFEB3B; }
+
+  .game .option:hover {
+    background: #f0f0f0;
+  }
+
+  #overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    color: #CFFE47;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-radius: 12px;
+  }
+  /* TITULO */
+h2 {
+  margin-bottom: 20px;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  color: #CFFE47;
+  text-align: center;
+}
+
+/* CONFIGURACIÓN */
+.config label {
+  display: block;
+  margin: 15px 0 5px;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+.config input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+}
+.config button {
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background: #CFFE47;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.config button:hover {
+  background: #b5e23d;
+}
+
+/* LOBBY */
+.lobby p {
+  font-size: 1.1rem;
+  margin: 20px 0 10px;
+  color: #ddd;
+  text-align: center;
+}
+.lobby #qrCode {
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 20px;
+  border: 4px solid #333;
+  border-radius: 8px;
+  background: #fff;
+}
+.lobby a {
+  display: block;
+  color: #CFFE47;
+  word-break: break-all;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+.lobby button {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: #CFFE47;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.lobby button:hover {
+  background: #b5e23d;
+}
+
+</style>
+
   <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 </head>
 <body>
@@ -152,7 +311,7 @@
   // 2) Asignar las respuestas SIN tocar el JSON local de preguntas:
   opts.forEach((el, i) => {
   el.textContent     = options[i];
-  el.style.background = '#2a2a2a';
+  el.style.background = '#ffffff';
   el.style.borderColor = optionColors[i];
   el.style.opacity = '1';
   });

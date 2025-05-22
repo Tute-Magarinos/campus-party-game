@@ -5,84 +5,175 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jugador - Campus Party Game</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family:'Segoe UI', Tahoma, sans-serif;
-      background:#121212;
-      color:#fff;
-      height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .mobile-container {
-      width: 90%;
-      max-width: 600px;
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-      text-align: center;
-    }
-    #player-form input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      font-size: 1rem;
-      border: 1px solid #333;
-      border-radius: 6px;
-      background: #2a2a2a;
-      color: #fff;
-    }
-    #player-form button {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 6px;
-      background: #CFFE47;
-      color: #000;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.3s;
-    }
-    #player-form button:hover {
-      background: #b5e23d;
-    }
-    #waiting-screen {
-      display: none;
-      font-size: 1.2rem;
-      margin-top: 20px;
-      color: #ddd;
-    }
-    #question-text-mobile {
-      display: none;
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      background: #2a2a2a;
-      padding: 15px;
-      border-radius: 8px;
-      color: #fff;
-    }
-    #answer-buttons button {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #2a2a2a;
-      color: #fff;
-      transition: background 0.3s, border-color 0.3s;
-      border: 2px solid transparent;
-    }
-    #answer-buttons button:hover {
-      background-color: #333;
-      border-color: #CFFE47;
-    }
-  </style>
+    @media (orientation: portrait) {
+  /* Oculta la UI normal */
+  .mobile-container { display: none !important; }
+  /* Muestra un overlay pidiendo girar */
+  body::before {
+    content: "Por favor gira tu dispositivo a posición horizontal";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    color: #555;
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 9999;
+  }
+}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f0f0f0;
+    color: #222;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-container {
+    width: 90%;
+    max-width: 400px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  #player-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fafafa;
+    color: #222;
+  }
+  #player-form button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 6px;
+    background: #4caf50;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s;
+  }
+  #player-form button:hover {
+    background: #43a047;
+  }
+  #waiting-screen {
+    display: none;
+    font-size: 1.2rem;
+    margin-top: 20px;
+    color: #555;
+  }
+  #question-text-mobile {
+    display: none;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    background: #fafafa;
+    padding: 15px;
+    border-radius: 8px;
+    color: #222;
+  }
+  #answer-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  #answer-buttons button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    transition: opacity 0.3s;
+  }
+  /* Specific colors for each answer */
+  #btn0 { background-color: #FF5722; }
+  #btn1 { background-color: #2196F3; }
+  #btn2 { background-color: #CFFE47; color: #222; }
+  #btn3 { background-color: #FFEB3B; color: #222; }
+
+  #answer-buttons button:hover {
+    opacity: 0.9;
+  }
+ @media (orientation: landscape) {
+  /* Contenedor en columna */
+  .mobile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    box-shadow: none;
+    padding: 20px;
+    border-radius: 0;
+  }
+
+  /* Pregunta: ancho completo arriba */
+  #question-text-mobile {
+    display: block;
+    width: 80vw;
+    max-width: 500px;
+    background: #fafafa;  /* o tu color de fondo */
+    color: #222;
+    font-size: 1.4rem;
+    font-weight: 600;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    text-align: left;
+  }
+
+  /* Grid de respuestas debajo */
+  #answer-buttons {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 80vw;
+    max-width: 500px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+  }
+  #answer-buttons button {
+    width: 100%;
+    height: 80px; /* ajusta altura fija */
+    font-size: 1.5rem;
+    border-radius: 8px;
+    border: none;
+    transition: opacity 0.3s;
+  }
+  /* Colores de cada botón */
+  #btn0 { background: #FF5722; } 
+  #btn1 { background: #2196F3; }
+  #btn2 { background: #CFFE47; color: #222; }
+  #btn3 { background: #FFEB3B; color: #222; }
+  
+  /* Hover opcional */
+  #answer-buttons button:hover {
+    opacity: 0.9;
+  }
+}
+
+</style>
+
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
