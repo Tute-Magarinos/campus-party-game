@@ -78,6 +78,173 @@
       "answer3": "Ruby",
       "answer4": "Go",
       "correct": 0
-    }
+    },
+    {
+    "question": "¿Qué significa la sigla API?",
+    "answer1": "Advanced Program Interface",
+    "answer2": "Application Programming Interface",
+    "answer3": "Automated Process Integration",
+    "answer4": "Active Protocol Integration",
+    "correct": 1
+  },
+  {
+    "question": "¿Cuál es la principal función de Git?",
+    "answer1": "Editar imágenes",
+    "answer2": "Crear sitios web",
+    "answer3": "Controlar versiones de código",
+    "answer4": "Diseñar bases de datos",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué lenguaje es conocido por su uso en análisis de datos?",
+    "answer1": "Java",
+    "answer2": "Ruby",
+    "answer3": "Python",
+    "answer4": "PHP",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál de estas estructuras sigue el principio FIFO?",
+    "answer1": "Pila",
+    "answer2": "Lista enlazada",
+    "answer3": "Cola",
+    "answer4": "Árbol binario",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace el operador '==' en la mayoría de los lenguajes?",
+    "answer1": "Asigna un valor",
+    "answer2": "Compara dos valores",
+    "answer3": "Concatena cadenas",
+    "answer4": "Devuelve una función",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es una función recursiva?",
+    "answer1": "Una función que se llama a sí misma",
+    "answer2": "Una función que no retorna nada",
+    "answer3": "Una función dentro de otra",
+    "answer4": "Una función que solo corre una vez",
+    "correct": 0
+  },
+  {
+    "question": "¿Cuál es la finalidad del método 'console.log' en JavaScript?",
+    "answer1": "Ejecutar un servidor",
+    "answer2": "Mostrar mensajes en consola",
+    "answer3": "Guardar datos en una base",
+    "answer4": "Crear un archivo",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué lenguaje se utiliza comúnmente para el backend con Node.js?",
+    "answer1": "C++",
+    "answer2": "Python",
+    "answer3": "JavaScript",
+    "answer4": "Go",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué significa SQL?",
+    "answer1": "Simple Query Language",
+    "answer2": "Structured Query Language",
+    "answer3": "Secure Query List",
+    "answer4": "Standard Quick Language",
+    "correct": 1
+  },
+  {
+    "question": "¿Cuál de estas no es una estructura de control de flujo?",
+    "answer1": "if",
+    "answer2": "for",
+    "answer3": "while",
+    "answer4": "define",
+    "correct": 3
+  },  {
+    "question": "¿Qué es una clase en programación orientada a objetos?",
+    "answer1": "Una función especial",
+    "answer2": "Una colección de estilos CSS",
+    "answer3": "Una plantilla para crear objetos",
+    "answer4": "Un tipo de variable global",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es el propósito del comando 'git init'?",
+    "answer1": "Iniciar un repositorio Git",
+    "answer2": "Eliminar el historial de cambios",
+    "answer3": "Subir código a GitHub",
+    "answer4": "Crear una rama nueva",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué tipo de dato representa 'true' y 'false'?",
+    "answer1": "String",
+    "answer2": "Integer",
+    "answer3": "Boolean",
+    "answer4": "Float",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace el método 'length' en un array?",
+    "answer1": "Ordena los elementos",
+    "answer2": "Elimina un elemento",
+    "answer3": "Devuelve la cantidad de elementos",
+    "answer4": "Duplica el array",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es una característica de los lenguajes tipados dinámicamente?",
+    "answer1": "El tipo de variable se define en tiempo de ejecución",
+    "answer2": "Requieren declaración explícita de tipos",
+    "answer3": "Son exclusivamente orientados a objetos",
+    "answer4": "No permiten funciones anónimas",
+    "correct": 0
+  },
+  {
+    "question": "¿Cuál es el resultado de 3 + '3' en JavaScript?",
+    "answer1": "6",
+    "answer2": "33",
+    "answer3": "Error",
+    "answer4": "NaN",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es un 'bug' en programación?",
+    "answer1": "Una mejora en el código",
+    "answer2": "Un error o fallo en el software",
+    "answer3": "Una librería externa",
+    "answer4": "Un estilo de codificación",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué etiqueta HTML se usa para insertar una imagen?",
+    "answer1": "<image>",
+    "answer2": "<src>",
+    "answer3": "<img>",
+    "answer4": "<media>",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace el método 'filter()' en un array de JavaScript?",
+    "answer1": "Agrega un elemento",
+    "answer2": "Cambia el tamaño del array",
+    "answer3": "Devuelve un nuevo array con los elementos que cumplen una condición",
+    "answer4": "Convierte el array en string",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué es un 'loop infinito'?",
+    "answer1": "Un ciclo que no se ejecuta nunca",
+    "answer2": "Un ciclo que nunca termina porque su condición siempre es verdadera",
+    "answer3": "Un ciclo que ejecuta una función recursiva",
+    "answer4": "Un ciclo que ejecuta sólo una vez",
+    "correct": 1
+  },
+  {
+  "question": "¿Qué símbolo representa una función flecha en JavaScript?",
+  "answer1": "=>",
+  "answer2": "->",
+  "answer3": "::",
+  "answer4": "**",
+  "correct": 0
+}
   ]
   
