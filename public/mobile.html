@@ -191,122 +191,130 @@
 
     <div id="question-text-mobile"></div>
     <div id="answer-buttons"></div>
+
+    <!-- Mensaje de finalización -->
+    <div id="end-message" style="display:none; font-size: 1.4rem; color:#333; margin-top:20px;">
+      🎉 El juego ha finalizado. ¡Gracias por jugar!
+    </div>
   </div>
 
-  <script>
-  const socket = io();
-  let salaId = null;
-  let preguntaId = null;
+<script>
+const socket = io();
+let salaId = null;
+let preguntaId = null;
 
-  const form = document.getElementById("player-form");
-  const waiting = document.getElementById("waiting-screen");
-  const nameInput = document.getElementById("player-name");
-  const emailInput = document.getElementById("player-email");
-  const salaInput = document.getElementById("player-sala");
-  const questionText = document.getElementById("question-text-mobile");
-  const answerButtons = document.getElementById("answer-buttons");
+const form = document.getElementById("player-form");
+const waiting = document.getElementById("waiting-screen");
+const questionText = document.getElementById("question-text-mobile");
+const answerButtons = document.getElementById("answer-buttons");
+const endMessage = document.getElementById("end-message");
 
-  // Leer sala desde la URL (por QR)
-  const salaParam = new URLSearchParams(window.location.search).get("salaId");
-  if (salaParam) salaInput.value = salaParam;
+const nameInput = document.getElementById("player-name");
+const emailInput = document.getElementById("player-email");
+const salaInput = document.getElementById("player-sala");
 
-  // Recuperar nombre y correo del localStorage
-  const nombreGuardado = localStorage.getItem("jugador_nombre");
-  const correoGuardado = localStorage.getItem("jugador_correo");
+const salaParam = new URLSearchParams(window.location.search).get("salaId");
+if (salaParam) salaInput.value = salaParam;
 
-  if (nombreGuardado) nameInput.value = nombreGuardado;
-  if (correoGuardado) emailInput.value = correoGuardado;
+const nombreGuardado = localStorage.getItem("jugador_nombre");
+const correoGuardado = localStorage.getItem("jugador_correo");
 
-  // Autoconexión si hay datos guardados y sala por URL
-if (nombreGuardado && correoGuardado && salaParam) {
-salaId = salaParam; // asignar correctamente
-nameInput.value = nombreGuardado;
-emailInput.value = correoGuardado;
-salaInput.value = salaParam;
+// Si el juego ya terminó, mostrar solo el mensaje final
+if (localStorage.getItem("juego_terminado") === "true") {
+  form.style.display = "none";
+  waiting.style.display = "none";
+  questionText.style.display = "none";
+  answerButtons.style.display = "none";
+  endMessage.style.display = "block";
+} else if (nombreGuardado && correoGuardado && salaParam) {
+  salaId = salaParam;
+  nameInput.value = nombreGuardado;
+  emailInput.value = correoGuardado;
+  salaInput.value = salaParam;
 
-socket.emit("joinSala", {
-salaId,
-tipo: "jugador",
-nombre: nombreGuardado,
-correo: correoGuardado
-});
+  socket.emit("joinSala", {
+    salaId,
+    tipo: "jugador",
+    nombre: nombreGuardado,
+    correo: correoGuardado
+  });
 
-form.style.display = "none";
-waiting.style.display = "block";
+  form.style.display = "none";
+  waiting.style.display = "block";
 }
 
- document.getElementById("btnStart").onclick = () => {
-const nombre = nameInput.value.trim();
-const correo = emailInput.value.trim();
-salaId = salaInput.value.trim(); // 💥 asegurate de tener esta línea
+document.getElementById("btnStart").onclick = () => {
+  const nombre = nameInput.value.trim();
+  const correo = emailInput.value.trim();
+  salaId = salaInput.value.trim();
 
-if (!nombre || !correo || !salaId) {
-alert("Por favor completá todos los campos.");
-return;
-}
+  if (!nombre || !correo || !salaId) {
+    alert("Por favor completá todos los campos.");
+    return;
+  }
 
-localStorage.setItem("jugador_nombre", nombre);
-localStorage.setItem("jugador_correo", correo);
+  localStorage.setItem("jugador_nombre", nombre);
+  localStorage.setItem("jugador_correo", correo);
+  localStorage.removeItem("juego_terminado"); // limpia en caso anterior
 
-socket.emit("joinSala", {
-salaId,
-tipo: "jugador",
-nombre,
-correo
-});
+  socket.emit("joinSala", {
+    salaId,
+    tipo: "jugador",
+    nombre,
+    correo
+  });
 
-form.style.display = "none";
-waiting.style.display = "block";
+  form.style.display = "none";
+  waiting.style.display = "block";
 };
 
-  socket.on("preguntaNueva", (data) => {
-    console.log("🟨 Recibida preguntaNueva:", data);
-    preguntaId = data.preguntaId;
-    waiting.style.display = "none";
-    questionText.style.display = "block";
-    questionText.innerText = data.preguntaText || data.question || data.texto || "Pregunta sin texto";
+socket.on("preguntaNueva", (data) => {
+  preguntaId = data.preguntaId;
+  waiting.style.display = "none";
+  questionText.style.display = "block";
+  endMessage.style.display = "none";
+  questionText.innerText = data.preguntaText || data.question || "Pregunta sin texto";
 
-    answerButtons.innerHTML = "";
-    answerButtons.style.display = "block";
+  answerButtons.innerHTML = "";
+  answerButtons.style.display = "grid";
 
-    const opciones = data.options || [
-      data.answer1,
-      data.answer2,
-      data.answer3,
-      data.answer4
-    ].filter(Boolean);
+  const opciones = data.options || [
+    data.answer1, data.answer2, data.answer3, data.answer4
+  ].filter(Boolean);
 
-    opciones.forEach((opcion, index) => {
-      const btn = document.createElement("button");
-      btn.innerText = opcion;
-      btn.id = "btn" + index;
-      btn.onclick = () => {
-        socket.emit("votar", {
-          salaId,
-          preguntaId,
-          opcionElegida: opcion,
-          opcionIndex: index
-        });
-        questionText.innerText = "✅ ¡Respuesta enviada!";
-        answerButtons.innerHTML = "";
-      };
-      answerButtons.appendChild(btn);
-    });
+  opciones.forEach((opcion, index) => {
+    const btn = document.createElement("button");
+    btn.innerText = opcion;
+    btn.id = "btn" + index;
+    btn.onclick = () => {
+      socket.emit("votar", {
+        salaId,
+        preguntaId,
+        opcionElegida: opcion,
+        opcionIndex: index
+      });
+      questionText.innerText = "✅ ¡Respuesta enviada!";
+      answerButtons.innerHTML = "";
+    };
+    answerButtons.appendChild(btn);
   });
+});
 
-  socket.on("votosActualizados", (votos) => {
-    console.log("📊 Votos:", votos);
-  });
+socket.on("resultadoJugador", (data) => {
+  questionText.innerText = data.correct ? "✅ ¡Correcto!" : "❌ Incorrecto";
+  answerButtons.innerHTML = "";
+});
 
-  socket.on("resultadoJugador", (data) => {
-    console.log("🧾 resultadoJugador recibido:", data);
-    questionText.innerText = data.correct
-      ? "✅ ¡Correcto!"
-      : "❌ Incorrecto";
-    answerButtons.innerHTML = "";
-  });
+socket.on("terminarJuego", () => {
+  console.log("🎉 Juego finalizado");
+  localStorage.setItem("juego_terminado", "true");
+
+  form.style.display = "none";
+  waiting.style.display = "none";
+  questionText.style.display = "none";
+  answerButtons.style.display = "none";
+  endMessage.style.display = "block";
+});
 </script>
-
-
 </body>
 </html>
