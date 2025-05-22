@@ -25,7 +25,12 @@ function setupSocket(io) {
       if (tipo === 'jugador') {
         const { data, error } = await supabase
           .from('jugadores')
-          .insert({ nombre: socket.data.nombre, correo: socket.data.correo, socket_id: socket.id, sala_id: salaId })
+          .insert({
+            nombre: socket.data.nombre,
+            correo: socket.data.correo,
+            socket_id: socket.id,
+            sala_id: salaId
+          })
           .select()
           .single();
 
@@ -85,52 +90,62 @@ function setupSocket(io) {
 
         io.to(salaId).emit('preguntaNueva', preguntaFormateada);
 
-       setTimeout(async () => {
-  const pregunta = preguntas[index];
-  const correctIndex = pregunta.correct;
-  const sala = salas[salaId];
+        setTimeout(async () => {
+          const pregunta = preguntas[index];
+          const correctIndex = pregunta.correct;
+          const sala = salas[salaId];
 
-  // Emitir a todos cuál es la correcta (para el master)
-  io.to(salaId).emit('respuestaCorrecta', { correctIndex });
+          io.to(salaId).emit('respuestaCorrecta', { correctIndex });
 
-  // Obtener todos los sockets conectados a la sala
-  const socketsEnSala = await io.in(salaId).fetchSockets();
+          const socketsEnSala = await io.in(salaId).fetchSockets();
 
-  // Emitir a cada jugador si respondió correctamente
-  for (const sock of socketsEnSala) {
-    const respuestaJugador = sala.votos[sock.id];
-    const respondio = respuestaJugador !== undefined;
-    const esCorrecta = respondio && respuestaJugador === pregunta[`answer${correctIndex + 1}`];
+          for (const sock of socketsEnSala) {
+            let respuestaJugador = sala.votos[sock.id];
 
-    sock.emit('resultadoJugador', { correct: esCorrecta });
+            const backup = sock.data?.ultimaRespuesta;
+            if (
+              respuestaJugador === undefined &&
+              backup &&
+              backup.preguntaId === pregunta.preguntaId
+            ) {
+              respuestaJugador = backup.opcionIndex;
+            }
 
-    // (opcional) Guardar en Supabase que no respondió
-    if (!respondio && sock.data?.jugadorId) {
-      await supabase.from('respuestas').insert({
-        jugador_id: sock.data.jugadorId,
-        pregunta: pregunta.question,
-        opcion: '[No respondió]'
-      });
-    }
-  }
+            const respondio = typeof respuestaJugador === "number";
+            const esCorrecta = respondio && respuestaJugador === correctIndex;
 
-  // Esperar unos segundos antes de pasar a la siguiente
-  setTimeout(() => {
-    index++;
-    enviarPregunta();
-  }, 4000);
+            console.log(`🧪 ${sock.data?.nombre || sock.id} eligió índice ${respuestaJugador}, correcta era ${correctIndex}`);
 
-}, 15000);
+            sock.emit("resultadoJugador", { correct: esCorrecta });
+
+            if (!respondio && sock.data?.jugadorId) {
+              await supabase.from("respuestas").insert({
+                jugador_id: sock.data.jugadorId,
+                pregunta: pregunta.question,
+                opcion: "[No respondió]"
+              });
+            }
+          }
+
+          setTimeout(() => {
+            index++;
+            enviarPregunta();
+          }, 4000);
+        }, 15000);
       }
 
       enviarPregunta();
     });
 
-    socket.on('votar', async ({ salaId, preguntaId, opcionElegida }) => {
+    socket.on('votar', async ({ salaId, preguntaId, opcionElegida, opcionIndex }) => {
       const sala = salas[salaId];
       if (!sala || !sala.inProgress || sala.preguntaId !== preguntaId) return;
 
-      sala.votos[socket.id] = opcionElegida;
+      sala.votos[socket.id] = opcionIndex;
+      socket.data.ultimaRespuesta = { preguntaId, opcionIndex };
+
+      console.log(`📨 voto de ${socket.data?.nombre || socket.id}: opción ${opcionIndex} en sala ${salaId}`);
+
       io.to(salaId).emit('votosActualizados', sala.votos);
 
       if (socket.data.jugadorId) {
