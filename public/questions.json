@@ -245,6 +245,486 @@
   "answer3": "::",
   "answer4": "**",
   "correct": 0
-}
+},
+  {
+    "question": "¿Qué biblioteca de Python es popular para ciencia de datos?",
+    "answer1": "NumPy",
+    "answer2": "Flask",
+    "answer3": "Django",
+    "answer4": "Vue",
+    "correct": 0
+  },
+  {
+    "question": "¿Cuál es el objetivo principal de una base de datos relacional?",
+    "answer1": "Almacenar imágenes",
+    "answer2": "Guardar datos estructurados en tablas",
+    "answer3": "Transmitir datos en tiempo real",
+    "answer4": "Renderizar gráficos",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué lenguaje se usa típicamente para diseñar la apariencia de una web?",
+    "answer1": "HTML",
+    "answer2": "JavaScript",
+    "answer3": "CSS",
+    "answer4": "Python",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué herramienta se usa para empaquetar proyectos en Node.js?",
+    "answer1": "npm",
+    "answer2": "pip",
+    "answer3": "docker",
+    "answer4": "gulp",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué estructura de datos usa nodos conectados?",
+    "answer1": "Array",
+    "answer2": "Lista enlazada",
+    "answer3": "Stack",
+    "answer4": "Queue",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué motor gráfico se basa en C++ y es usado en AAA games?",
+    "answer1": "Godot",
+    "answer2": "Unreal Engine",
+    "answer3": "Unity",
+    "answer4": "Phaser",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué lenguaje es conocido por su velocidad y uso en sistemas?",
+    "answer1": "Python",
+    "answer2": "C",
+    "answer3": "PHP",
+    "answer4": "JavaScript",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué hace el método 'map()' en JavaScript?",
+    "answer1": "Modifica todos los elementos de un array",
+    "answer2": "Filtra elementos duplicados",
+    "answer3": "Devuelve un nuevo array aplicando una función",
+    "answer4": "Convierte un array en objeto",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es el formato más liviano para intercambio de datos?",
+    "answer1": "JSON",
+    "answer2": "XML",
+    "answer3": "CSV",
+    "answer4": "XLSX",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué función en Python imprime datos en consola?",
+    "answer1": "console.log()",
+    "answer2": "write()",
+    "answer3": "echo()",
+    "answer4": "print()",
+    "correct": 3
+  },
+  {
+    "question": "¿Qué es GitHub?",
+    "answer1": "Un lenguaje de programación",
+    "answer2": "Un editor de código",
+    "answer3": "Una plataforma para alojar repositorios Git",
+    "answer4": "Un sistema de bases de datos",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué significa HTML?",
+    "answer1": "HyperText Markup Language",
+    "answer2": "HighText Management Language",
+    "answer3": "Hyper Transfer Machine Language",
+    "answer4": "Home Tool Markup Language",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué librería de IA es desarrollada por Facebook?",
+    "answer1": "TensorFlow",
+    "answer2": "Keras",
+    "answer3": "PyTorch",
+    "answer4": "Scikit-learn",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué significa CSS?",
+    "answer1": "Creative Style System",
+    "answer2": "Cascading Style Sheets",
+    "answer3": "Coding Style Syntax",
+    "answer4": "Computer Style Sheet",
+    "correct": 1
+  },
+  {
+    "question": "¿Cuál es una característica de los objetos en JS?",
+    "answer1": "Se accede por índices",
+    "answer2": "Son inmutables",
+    "answer3": "Tienen claves y valores",
+    "answer4": "No pueden contener funciones",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué tipo de algoritmo es Dijkstra?",
+    "answer1": "De ordenamiento",
+    "answer2": "De compresión",
+    "answer3": "De búsqueda de caminos mínimos",
+    "answer4": "De clasificación",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál de estos no es un lenguaje de programación?",
+    "answer1": "Java",
+    "answer2": "C#",
+    "answer3": "Linux",
+    "answer4": "Ruby",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es la función principal de una API REST?",
+    "answer1": "Renderizar gráficos 3D",
+    "answer2": "Transmitir datos entre cliente y servidor",
+    "answer3": "Optimizar código JavaScript",
+    "answer4": "Conectar bases de datos locales",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es una promesa (Promise) en JavaScript?",
+    "answer1": "Una función sin retorno",
+    "answer2": "Un bloque de código condicional",
+    "answer3": "Un objeto que representa un valor futuro",
+    "answer4": "Una variable global",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué significa la sigla CRUD?",
+    "answer1": "Compute, Run, Update, Delete",
+    "answer2": "Create, Read, Update, Delete",
+    "answer3": "Connect, Route, Upload, Download",
+    "answer4": "Code, Render, Use, Deploy",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es un IDE?",
+    "answer1": "Un tipo de función recursiva",
+    "answer2": "Una plataforma de juegos",
+    "answer3": "Un entorno de desarrollo integrado",
+    "answer4": "Un método de ordenamiento",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué es el DOM en desarrollo web?",
+    "answer1": "Una base de datos relacional",
+    "answer2": "Una API para estructuras de documentos HTML",
+    "answer3": "Una librería de JavaScript",
+    "answer4": "Un servidor de hosting",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué representa 'NaN' en JavaScript?",
+    "answer1": "Not a Node",
+    "answer2": "Null and None",
+    "answer3": "Not a Number",
+    "answer4": "No assigned Name",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es el resultado de typeof null en JS?",
+    "answer1": "'null'",
+    "answer2": "'object'",
+    "answer3": "'undefined'",
+    "answer4": "'boolean'",
+    "correct": 1
+  },
+  {
+    "question": "¿Cuál de estas herramientas se usa para desarrollo frontend?",
+    "answer1": "React",
+    "answer2": "PostgreSQL",
+    "answer3": "Django",
+    "answer4": "Nginx",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué estructura es LIFO?",
+    "answer1": "Cola",
+    "answer2": "Pila",
+    "answer3": "Árbol",
+    "answer4": "Hash table",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué hace 'parseInt' en JS?",
+    "answer1": "Devuelve la raíz cuadrada",
+    "answer2": "Transforma string a número entero",
+    "answer3": "Convierte booleanos",
+    "answer4": "Redondea un float",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es JSON.stringify?",
+    "answer1": "Convierte un string en objeto",
+    "answer2": "Valida estructuras de datos",
+    "answer3": "Convierte un objeto en string",
+    "answer4": "Envía datos por red",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué sistema controla dependencias en proyectos Node.js?",
+    "answer1": "Git",
+    "answer2": "npm",
+    "answer3": "Webpack",
+    "answer4": "Python",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué hace una función 'async' en JS?",
+    "answer1": "Hace que todo sea síncrono",
+    "answer2": "Permite ejecutar código asincrónico con 'await'",
+    "answer3": "Bloquea el hilo principal",
+    "answer4": "Optimiza memoria",
+    "correct": 1
+  },
+   {
+    "question": "¿Qué lenguaje se usa para definir la estructura de una página web?",
+    "answer1": "CSS",
+    "answer2": "JavaScript",
+    "answer3": "HTML",
+    "answer4": "Python",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué es una 'API RESTful'?",
+    "answer1": "Una API que usa protocolo SOAP",
+    "answer2": "Una API basada en principios HTTP",
+    "answer3": "Un servidor de base de datos",
+    "answer4": "Una extensión de JSON",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué librería de JavaScript se usa para manipular el DOM?",
+    "answer1": "React",
+    "answer2": "D3.js",
+    "answer3": "jQuery",
+    "answer4": "TensorFlow",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué tipo de datos permite múltiples tipos en TypeScript?",
+    "answer1": "Tuple",
+    "answer2": "Union",
+    "answer3": "Array",
+    "answer4": "Object",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué empresa desarrolla TensorFlow?",
+    "answer1": "Microsoft",
+    "answer2": "IBM",
+    "answer3": "Google",
+    "answer4": "Facebook",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué es Web3?",
+    "answer1": "Una nueva versión de HTML",
+    "answer2": "Una red social descentralizada",
+    "answer3": "La evolución de la web basada en blockchain",
+    "answer4": "Un servidor web de código abierto",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué herramienta permite versionar paquetes en JS?",
+    "answer1": "Git",
+    "answer2": "npm",
+    "answer3": "Postman",
+    "answer4": "Jira",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué significa la sigla UI en desarrollo?",
+    "answer1": "User Identification",
+    "answer2": "Unified Interface",
+    "answer3": "User Interface",
+    "answer4": "Universal Input",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué operador se usa para la negación lógica?",
+    "answer1": "&",
+    "answer2": "!",
+    "answer3": "^",
+    "answer4": "%",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué significa DevOps?",
+    "answer1": "Desarrollo de servidores",
+    "answer2": "Operaciones de diseño",
+    "answer3": "Integración de desarrollo y operaciones",
+    "answer4": "Testing automático",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace el método 'push()' en un array?",
+    "answer1": "Ordena los elementos",
+    "answer2": "Elimina el primer elemento",
+    "answer3": "Agrega un elemento al final",
+    "answer4": "Divide el array",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál de estos no es un tipo de dato primitivo?",
+    "answer1": "Boolean",
+    "answer2": "Number",
+    "answer3": "Array",
+    "answer4": "String",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es el formato nativo de almacenamiento en MongoDB?",
+    "answer1": "SQL",
+    "answer2": "CSV",
+    "answer3": "BSON",
+    "answer4": "XML",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace una red neuronal convolucional (CNN)?",
+    "answer1": "Analiza audio",
+    "answer2": "Clasifica texto",
+    "answer3": "Reconoce patrones en imágenes",
+    "answer4": "Genera música",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace el método 'pop()' en un array?",
+    "answer1": "Agrega un elemento al inicio",
+    "answer2": "Elimina el último elemento",
+    "answer3": "Filtra elementos duplicados",
+    "answer4": "Vacía el array",
+    "correct": 1
+  },
+  {
+    "question": "¿Cuál es un lenguaje usado para scripts del lado del servidor?",
+    "answer1": "HTML",
+    "answer2": "CSS",
+    "answer3": "JavaScript",
+    "answer4": "PHP",
+    "correct": 3
+  },
+  {
+    "question": "¿Qué operador se usa para comparar estrictamente en JS?",
+    "answer1": "==",
+    "answer2": "=",
+    "answer3": "===",
+    "answer4": "!=",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué es un breakpoint en depuración?",
+    "answer1": "Un error de código",
+    "answer2": "Un punto donde el código se pausa para inspección",
+    "answer3": "Un tipo de ciclo",
+    "answer4": "Una función especial",
+    "correct": 1
+  },
+  {
+    "question": "¿Cuál es el objetivo de un middleware en backend?",
+    "answer1": "Interceptar y procesar solicitudes",
+    "answer2": "Mostrar HTML",
+    "answer3": "Escribir logs",
+    "answer4": "Configurar base de datos",
+    "correct": 0
+  },
+  {
+    "question": "¿Cuál de estos métodos modifica un array original?",
+    "answer1": "filter()",
+    "answer2": "map()",
+    "answer3": "slice()",
+    "answer4": "splice()",
+    "correct": 3
+  },
+  {
+    "question": "¿Qué es una 'key' en una base de datos?",
+    "answer1": "Un nombre de usuario",
+    "answer2": "Un índice de búsqueda único",
+    "answer3": "Un valor repetido",
+    "answer4": "Un tipo de consulta",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es una 'callback' en JS?",
+    "answer1": "Una variable local",
+    "answer2": "Una función que se pasa como argumento",
+    "answer3": "Un método para bucles",
+    "answer4": "Una clase anónima",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué indica el error 404?",
+    "answer1": "Página no encontrada",
+    "answer2": "Permiso denegado",
+    "answer3": "Error interno del servidor",
+    "answer4": "Tiempo de espera agotado",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué herramienta se usa para crear estilos con lógica?",
+    "answer1": "SCSS",
+    "answer2": "CSS",
+    "answer3": "HTML",
+    "answer4": "XML",
+    "correct": 0
+  },
+  {
+    "question": "¿Qué significa 'refactorizar' el código?",
+    "answer1": "Eliminar funcionalidades",
+    "answer2": "Reducir líneas de código",
+    "answer3": "Reescribir código sin cambiar su funcionalidad",
+    "answer4": "Traducir el código",
+    "correct": 2
+  },
+  {
+    "question": "¿Cuál es la extensión de archivo para código Python?",
+    "answer1": ".pt",
+    "answer2": ".py",
+    "answer3": ".pyt",
+    "answer4": ".ps",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es una librería?",
+    "answer1": "Una base de datos de usuarios",
+    "answer2": "Un conjunto de funciones reutilizables",
+    "answer3": "Una interfaz gráfica",
+    "answer4": "Un entorno virtual",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué es el protocolo HTTP?",
+    "answer1": "Una base de datos",
+    "answer2": "Un tipo de lenguaje",
+    "answer3": "Un protocolo de transferencia de datos web",
+    "answer4": "Un sistema operativo",
+    "correct": 2
+  },
+  {
+    "question": "¿Qué hace 'npm install'?",
+    "answer1": "Crea un nuevo repositorio",
+    "answer2": "Agrega dependencias al proyecto",
+    "answer3": "Ejecuta un archivo JS",
+    "answer4": "Borra módulos",
+    "correct": 1
+  },
+  {
+    "question": "¿Qué estructura de datos usa claves únicas?",
+    "answer1": "Array",
+    "answer2": "Set",
+    "answer3": "Object",
+    "answer4": "Tree",
+    "correct": 2
+  }
   ]
   
