@@ -171,6 +171,7 @@ h2 {
   border-radius: 8px;
   background: #fff;
 }
+
 .lobby a {
   display: block;
   color: #CFFE47;
@@ -193,6 +194,27 @@ h2 {
 }
 .lobby button:hover {
   background: #b5e23d;
+}
+#qr2Div{
+  display: flex;
+  flex-direction: row;
+  justify-content: baseline;
+  align-items: center;
+}
+
+#qr2Div h1{
+  text-align: start;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+#qrCode2 {
+  display: block;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 20px;
+  border: 4px solid #333;
+  border-radius: 8px;
+  background: #fff;
 }
 
 </style>
@@ -222,6 +244,8 @@ h2 {
   </div>
   <!-- Juego -->
   <div id="gameSection" class="screen game">
+    <div id="qr2Div"><img id="qrCode2" src="" alt="QR2" />
+    <h1>¡Escaneá el QR y unite a la trivia!</h1></div>
     <div id="timer-container"><div id="timer-bar"></div></div>
     <div id="question-number">Pregunta Nro <span id="question-index">0</span></div>
     <div id="question-text"></div>
@@ -247,6 +271,7 @@ h2 {
     const toLobbyBtn = document.getElementById('toLobbyBtn');
     const startBtn = document.getElementById('startBtn');
     const qrImg = document.getElementById('qrCode');
+    const qrImg2 = document.getElementById('qrCode2');
     const lobbyUrl = document.getElementById('lobbyUrl');
     const timerBar = document.getElementById('timer-bar');
     const qIndexEl = document.getElementById('question-index');
@@ -290,6 +315,8 @@ h2 {
       lobbyUrl.textContent = mobileUrl;
       qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
       qrImg.style.display = 'block';
+      qrImg2.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
+      qrImg2.style.display = 'block';
       lobbyUrl.style.display = 'block';
       configSection.classList.remove('active');
       lobbySection.classList.add('active');
