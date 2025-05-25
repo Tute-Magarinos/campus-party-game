@@ -76,6 +76,7 @@
     color: #555;
   }
   #question-text-mobile {
+  
     display: none;
     font-size: 1.4rem;
     font-weight: 600;
@@ -99,7 +100,7 @@
     font-size: 1.1rem;
     border: none;
     border-radius: 8px;
-    color: #fff;
+    color: #000000;
     transition: opacity 0.3s;
   }
   /* Specific colors for each answer */
@@ -117,7 +118,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     width: 100vw;
     height: 100vh;
     background: transparent;
@@ -125,7 +126,9 @@
     padding: 20px;
     border-radius: 0;
   }
-
+  .hide-important{
+    display: none !important;
+  }
   /* Pregunta: ancho completo arriba */
   #question-text-mobile {
     display: block;
@@ -143,7 +146,7 @@
 
   /* Grid de respuestas debajo */
   #answer-buttons {
-    display: grid !important;
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     width: 80vw;
@@ -155,7 +158,7 @@
   #answer-buttons button {
     width: 100%;
     height: 80px; /* ajusta altura fija */
-    font-size: 1.5rem;
+    font-size: 1rem;
     border-radius: 8px;
     border: none;
     transition: opacity 0.3s;
@@ -189,8 +192,8 @@
       <p>Esperando que comience el juego...</p>
     </div>
 
-    <div id="question-text-mobile"></div>
-    <div id="answer-buttons"></div>
+    <div id="question-text-mobile" class="hide-important"></div>
+    <div id="answer-buttons" class="hide-important"></div>
 
     <!-- Mensaje de finalización -->
     <div id="end-message" style="display:none; font-size: 1.4rem; color:#333; margin-top:20px;">
@@ -267,9 +270,12 @@
 
     form.style.display = "none";
     waiting.style.display = "block";
+    
   };
 
   socket.on("preguntaNueva", (data) => {
+    questionText.classList.remove("hide-important");
+    answerButtons.classList.remove("hide-important");
     localStorage.removeItem("juego_finalizado");
     preguntaId = data.preguntaId;
 
