@@ -174,10 +174,32 @@
     opacity: 0.9;
   }
 }
-
+.hide-important {
+  display: none !important;
+}
 </style>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js">
+  const restartBtn = document.getElementById("restart-btn");
+ const restartContainer = document.getElementById("restart-container");
+
+  if (localStorage.getItem("juego_finalizado") === "true") {
+    document.getElementById("end-message").style.display = "block";
+ restartContainer.classList.remove("hide-important");
+  }
+
+  restartBtn.onclick = () => {
+    localStorage.removeItem("juego_finalizado");
+    document.getElementById("end-message").style.display = "none";
+    restartContainer.style.display = "none";
+    form.style.display = "block";
+    waiting.style.display = "none";
+    questionText.style.display = "none";
+    answerButtons.style.display = "none";
+    salaInput.value = salaParam || '';
+  };
+
+</script>
 </head>
 <body>
   <div class="mobile-container">
@@ -200,7 +222,7 @@
       🎉 El juego ha finalizado. ¡Gracias por jugar!
     </div>
   </div>
-
+ 
 <script>
   const socket = io();
   let salaId = null;
@@ -214,15 +236,7 @@
   const questionText = document.getElementById("question-text-mobile");
   const answerButtons = document.getElementById("answer-buttons");
 
-  // Si el juego ya terminó y está registrado en localStorage, mostrar mensaje final
-  if (localStorage.getItem("juego_finalizado") === "true") {
-    document.body.innerHTML = `
-      <div style="padding: 40px; text-align: center; font-size: 1.4rem; color: #333;">
-        🎉 El juego ha finalizado. ¡Gracias por jugar!
-      </div>
-    `;
-    throw new Error("Fin del juego, bloqueo de nueva participación");
-  }
+  
 
   // Leer sala desde la URL (por QR)
   const salaParam = new URLSearchParams(window.location.search).get("salaId");
@@ -274,53 +288,49 @@
   };
 
   socket.on("preguntaNueva", (data) => {
-    questionText.classList.remove("hide-important");
-    answerButtons.classList.remove("hide-important");
     localStorage.removeItem("juego_finalizado");
     preguntaId = data.preguntaId;
 
-    waiting.style.display = "none";
-    questionText.style.display = "block";
-    questionText.innerText = data.preguntaText || "Pregunta sin texto";
+  waiting.style.display = "none";
+  questionText.style.display = "block";
+  questionText.innerText = data.preguntaText || "Pregunta sin texto";
 
-    answerButtons.innerHTML = "";
-    answerButtons.style.display = "grid";
+  answerButtons.innerHTML = "";
+  answerButtons.style.display = "grid";
 
-    const opciones = data.options || [];
-    opciones.forEach((opcion, index) => {
-      const btn = document.createElement("button");
-      btn.innerText = opcion;
-      btn.id = "btn" + index;
+  const opciones = data.options || [];
+  opciones.forEach((opcion, index) => {
+    const btn = document.createElement("button");
+    btn.innerText = opcion;
+    btn.id = "btn" + index;
 
-      btn.onclick = () => {
-        socket.emit("votar", {
-          salaId,
-          preguntaId,
-          opcionElegida: opcion,
-          opcionIndex: index
-        });
+    btn.onclick = () => {
+      socket.emit("votar", {
+        salaId,
+        preguntaId,
+        opcionElegida: opcion,
+        opcionIndex: index
+      });
 
-        questionText.innerText = "✅ ¡Respuesta enviada!";
-        answerButtons.innerHTML = "";
-      };
+      questionText.innerText = "✅ ¡Respuesta enviada!";
+      answerButtons.innerHTML = "";
+    };
 
-      answerButtons.appendChild(btn);
-    });
+    answerButtons.appendChild(btn);
   });
+});
 
   socket.on("resultadoJugador", (data) => {
     questionText.innerText = data.correct ? "✅ ¡Correcto!" : "❌ Incorrecto";
     answerButtons.innerHTML = "";
   });
 
-  socket.on("terminarJuego", () => {
-    localStorage.setItem("juego_finalizado", "true");
-    document.body.innerHTML = `
-      <div style="padding: 40px; text-align: center; font-size: 1.4rem; color: #333;">
-        🎉 El juego ha finalizado. ¡Gracias por jugar!
-      </div>
-    `;
-  });
+socket.on("terminarJuego", () => {
+  document.getElementById("end-message").style.display = "block";
+  questionText.style.display = "none";
+  answerButtons.innerHTML = "";
+  answerButtons.style.display = "none";
+});
 </script>
 
 </body>
