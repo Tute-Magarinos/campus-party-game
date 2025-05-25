@@ -214,8 +214,8 @@
       <p>Esperando que comience el juego...</p>
     </div>
 
-    <div id="question-text-mobile" class="hide-important"></div>
-    <div id="answer-buttons" class="hide-important"></div>
+    <div id="question-text-mobile" ></div>
+    <div id="answer-buttons" ></div>
 
     <!-- Mensaje de finalización -->
     <div id="end-message" style="display:none; font-size: 1.4rem; color:#333; margin-top:20px;">
@@ -288,6 +288,8 @@
   };
 
   socket.on("preguntaNueva", (data) => {
+document.getElementById("end-message").style.display = "none";
+
     localStorage.removeItem("juego_finalizado");
     preguntaId = data.preguntaId;
 
