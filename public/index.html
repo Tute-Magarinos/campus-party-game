@@ -305,7 +305,7 @@ h2 {
       const sala = startBtn.dataset.sala;
       const qCount = parseInt(startBtn.dataset.qCount,10);
       socket.emit("joinSala", { salaId: sala, tipo: "master" });
-      socket.emit('startGame', { salaId: sala, questionCount: qCount });
+      socket.emit('startGame', { salaId: sala, questionCount: qCount, duration: duration });
       lobbySection.classList.remove('active');
       gameSection.classList.add('active');
     };

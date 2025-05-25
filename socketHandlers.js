@@ -48,7 +48,7 @@ function setupSocket(io) {
       }
     });
 
-    socket.on('startGame', ({ salaId, questionCount }) => {
+    socket.on('startGame', ({ salaId, questionCount, duration }) => {
       console.log(`🎮 Juego iniciado en ${salaId}`);
 
       const rawQuestions = require('./public/questions.json');
@@ -76,7 +76,7 @@ function setupSocket(io) {
             pregunta.answer3,
             pregunta.answer4
           ],
-          timer: 15000
+          timer: duration
         };
 
         salas[salaId] = {
@@ -131,7 +131,7 @@ function setupSocket(io) {
             index++;
             enviarPregunta();
           }, 4000);
-        }, 15000);
+        }, duration);
       }
 
       enviarPregunta();
