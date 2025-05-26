@@ -185,7 +185,7 @@
 
   if (localStorage.getItem("juego_finalizado") === "true") {
     document.getElementById("end-message").style.display = "block";
- restartContainer.classList.remove("hide-important");
+    restartContainer.classList.remove("hide-important");
   }
 
   restartBtn.onclick = () => {
@@ -213,7 +213,9 @@
     <div id="waiting-screen">
       <p>Esperando que comience el juego...</p>
     </div>
-
+    <div id="waiting-screen-error" class="hide-important">
+      <p>Sala no encontrada...</p>
+    </div>
     <div id="question-text-mobile" class="hide-important"></div>
     <div id="answer-buttons" class="hide-important"></div>
 
@@ -230,6 +232,7 @@
 
   const form = document.getElementById("player-form");
   const waiting = document.getElementById("waiting-screen");
+  const waiting_error = document.getElementById("waiting-screen-error");
   const nameInput = document.getElementById("player-name");
   const emailInput = document.getElementById("player-email");
   const salaInput = document.getElementById("player-sala");
@@ -296,6 +299,7 @@ document.getElementById("end-message").style.display = "none";
     preguntaId = data.preguntaId;
 
   waiting.style.display = "none";
+  waiting_error.style.display = "none";
   questionText.style.display = "block";
   questionText.innerText = data.preguntaText || "Pregunta sin texto";
 
@@ -335,6 +339,27 @@ socket.on("terminarJuego", () => {
   answerButtons.innerHTML = "";
   answerButtons.style.display = "none";
 });
+
+socket.on("salaNotFound", () => {
+  form.style.display = "none";
+  waiting_error.classList.remove("hide-important");
+  waiting.style.display = "none";
+});
+
+socket.on("resetClient", () => {
+ localStorage.removeItem("juego_finalizado");
+
+  form.style.display = "block";
+  waiting.style.display = "none";
+  waiting_error.classList.add("hide-important");
+  questionText.classList.add("hide-important");
+  answerButtons.classList.add("hide-important");
+  questionText.style.display = "none";
+  answerButtons.style.display = "none";
+
+  document.getElementById("end-message").style.display = "none";
+});
+
 </script>
 
 </body>

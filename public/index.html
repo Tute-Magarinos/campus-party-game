@@ -399,15 +399,7 @@ socket.on('respuestaCorrecta', ({ correctIndex }) => {
       overlay.textContent = '¡Fin del juego!';
     });
 
-    document.addEventListener('keydown', e => {
-  if (e.key === '1') {
-    // Emitir reset al servidor
-    const sala = salaIdInput.value.trim();
-    socket.emit('resetGame', { salaId: sala });
-    // Reiniciar tu UI local
-    showConfig();
-  }
-});
+
 
 
     // Reconexión automática
@@ -415,6 +407,16 @@ socket.on('respuestaCorrecta', ({ correctIndex }) => {
       const sala = salaInput.value.trim();
       socket.emit('joinSala', { salaId: sala, tipo: 'master' });
     });
+
+      document.addEventListener('keydown', function(event) {
+      if (event.key === 'q' || event.key === 'Q') {
+        // Emitir reset al servidor
+      const sala = salaIdInput.value.trim();
+      socket.emit('resetGame', { salaId: sala });
+      // Reiniciar tu UI local
+      showConfig();
+      }
+      });
   </script>
 </body>
 </html>
