@@ -7,58 +7,123 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 function setupSocket(io) {
   const salas = {};
+  const timeoutsPorSala = {};
+
+  function crearTimeoutParaSala(salaId, pregunta, duration) {
+    return setTimeout(async () => {
+      const sala = salas[salaId];
+      if (!sala) return;
+
+      const correctIndex = typeof pregunta.correct === 'number' ? pregunta.correct : 0;
+
+      io.to(salaId).emit('respuestaCorrecta', { correctIndex, salaId });
+
+      const socketsEnSala = await io.in(salaId).fetchSockets();
+
+      for (const sock of socketsEnSala) {
+        let respuestaJugador = sala.votos[sock.id];
+        const backup = sock.data?.ultimaRespuesta;
+
+        if (
+          respuestaJugador === undefined &&
+          backup &&
+          backup.preguntaId === pregunta.preguntaId
+        ) {
+          respuestaJugador = backup.opcionIndex;
+        }
+
+        const respondio = typeof respuestaJugador === "number";
+        const esCorrecta = respondio && respuestaJugador === correctIndex;
+
+        sock.emit("resultadoJugador", { correct: esCorrecta });
+
+        if (!respondio && sock.data?.jugadorId) {
+          await supabase.from("respuestas").insert({
+            jugador_id: sock.data.jugadorId,
+            pregunta: pregunta.question,
+            opcion: "[No respondió]"
+          });
+        }
+      }
+
+      setTimeout(() => {
+        salas[salaId].currentIndex++;
+        enviarPregunta(salaId, duration);
+      }, 4000);
+    }, duration);
+  }
+
+  async function enviarPregunta(salaId, duration) {
+    const sala = salas[salaId];
+    if (!sala || sala.currentIndex >= sala.preguntas.length) {
+      io.to(salaId).emit('terminarJuego', { mensaje: 'Fin del juego', salaId });
+      sala.inProgress = false;
+      return;
+    }
+
+    const pregunta = sala.preguntas[sala.currentIndex];
+
+    const preguntaFormateada = {
+      preguntaId: pregunta.id || sala.currentIndex,
+      question: pregunta.question,
+      preguntaIndex: sala.currentIndex,
+      preguntaText: pregunta.question,
+      options: [
+        pregunta.answer1,
+        pregunta.answer2,
+        pregunta.answer3,
+        pregunta.answer4
+      ],
+      timer: duration
+    };
+
+    sala.votos = {};
+    sala.preguntaId = preguntaFormateada.preguntaId;
+    sala.preguntaActual = preguntaFormateada;
+
+    console.log(`📤 Enviando pregunta ${sala.currentIndex} a sala ${salaId}`);
+    io.to(salaId).emit('preguntaNueva', { ...preguntaFormateada, salaId });
+
+    if (timeoutsPorSala[salaId]) clearTimeout(timeoutsPorSala[salaId]);
+    timeoutsPorSala[salaId] = crearTimeoutParaSala(salaId, pregunta, duration);
+  }
 
   io.on('connection', (socket) => {
     console.log('🟢 Conectado:', socket.id);
 
     socket.on('joinSala', async ({ salaId, tipo, nombre, correo }) => {
-      if(tipo === 'master'){
-        socket.join(salaId);
-        socket.data.salaId = salaId;
-        socket.data.tipo = tipo;
-        socket.data.nombre = nombre || 'Anónimo';
-        socket.data.correo = correo || '';
+      socket.join(salaId);
+      socket.data.salaId = salaId;
+      socket.data.tipo = tipo;
+      socket.data.nombre = nombre || 'Anónimo';
+      socket.data.correo = correo || '';
 
-        console.log(`🔗 ${tipo} unido a sala ${salaId} - ${nombre || ''}`);
+      console.log(`🔗 ${tipo} unido a sala ${salaId} - ${nombre || ''}`);
 
+      if (tipo === 'master') {
         await supabase.from('salas').upsert({ id: salaId, finalizada: false });
       }
-      
-      if (tipo === 'jugador') {     
-        let { data: salas, error } = await supabase.from('salas').select('*');   
-        
-        if(salas.find(sala => sala.id === salaId).finalizada == false){
-          
-          socket.join(salaId);
-          socket.data.salaId = salaId;
-          socket.data.tipo = tipo;
-          socket.data.nombre = nombre || 'Anónimo';
-          socket.data.correo = correo || '';
-          const { data, error } = await supabase
-          .from('jugadores')
-          .insert({
-            nombre: socket.data.nombre,
-            correo: socket.data.correo,
-            socket_id: socket.id,
-            sala_id: salaId
-          })
-          .select()
-          .single();
 
-        if (error) {
-          console.error('❌ Error al registrar jugador:', error.message);
+      if (tipo === 'jugador') {
+        let { data: salasDB, error } = await supabase.from('salas').select('*');
+        if (salasDB.find(sala => sala.id === salaId)?.finalizada === false) {
+          const { data, error } = await supabase
+            .from('jugadores')
+            .insert({
+              nombre: socket.data.nombre,
+              correo: socket.data.correo,
+              socket_id: socket.id,
+              sala_id: salaId
+            })
+            .select()
+            .single();
+
+          if (!error) {
+            socket.data.jugadorId = data.id;
+          }
         } else {
-          socket.data.jugadorId = data.id;
-          console.log('✅ Jugador insertado correctamente:', data);
-        }
-          
-        }
-        else{
           socket.emit('salaNotFound');
-          
         }
- 
-        
       }
 
       const sala = salas[salaId];
@@ -68,95 +133,31 @@ function setupSocket(io) {
     });
 
     socket.on('startGame', ({ salaId, questionCount, duration }) => {
-      console.log(`🎮 Juego iniciado en ${salaId}`);
-
-      const rawQuestions = require('./public/questions.json');
-      const shuffled = [...rawQuestions].sort(() => 0.5 - Math.random());
-      const preguntas = shuffled.slice(0, questionCount);
-
-      let index = 0;
-
-      function enviarPregunta() {
-        if (index >= preguntas.length) {
-          io.to(salaId).emit('terminarJuego', { mensaje: 'Fin del juego' });
-          return;
-        }
-
-        const pregunta = preguntas[index];
-
-        const preguntaFormateada = {
-          preguntaId: pregunta.id || index,
-          question: pregunta.question,
-          preguntaIndex: index,
-          preguntaText: pregunta.question,
-          options: [
-            pregunta.answer1,
-            pregunta.answer2,
-            pregunta.answer3,
-            pregunta.answer4
-          ],
-          timer: duration
-        };
-
-        salas[salaId] = {
-          votos: {},
-          preguntaId: preguntaFormateada.preguntaId,
-          preguntaActual: preguntaFormateada,
-          preguntas,
-          currentIndex: index,
-          inProgress: true
-        };
-
-        io.to(salaId).emit('preguntaNueva', preguntaFormateada);
-
-        setTimeout(async () => {
-  const sala = salas[salaId];
-  if (!sala) return; // La sala fue reseteada, no seguir
-
-  const pregunta = preguntas[index];
-  const correctIndex = pregunta.correct;
-
-  io.to(salaId).emit('respuestaCorrecta', { correctIndex });
-
-  const socketsEnSala = await io.in(salaId).fetchSockets();
-
-  for (const sock of socketsEnSala) {
-    let respuestaJugador = sala.votos[sock.id];
-
-    const backup = sock.data?.ultimaRespuesta;
-    if (
-      respuestaJugador === undefined &&
-      backup &&
-      backup.preguntaId === pregunta.preguntaId
-    ) {
-      respuestaJugador = backup.opcionIndex;
-    }
-
-    const respondio = typeof respuestaJugador === "number";
-    const esCorrecta = respondio && respuestaJugador === correctIndex;
-
-    console.log(`🧪 ${sock.data?.nombre || sock.id} eligió índice ${respuestaJugador}, correcta era ${correctIndex}`);
-
-    sock.emit("resultadoJugador", { correct: esCorrecta });
-
-    if (!respondio && sock.data?.jugadorId) {
-      await supabase.from("respuestas").insert({
-        jugador_id: sock.data.jugadorId,
-        pregunta: pregunta.question,
-        opcion: "[No respondió]"
-      });
-    }
-    }
-
-        setTimeout(() => {
-          index++;
-          enviarPregunta();
-        }, 4000);
-      }, duration);
-
+      if (socket.data?.tipo !== 'master') {
+        console.warn(`⛔ ${socket.id} intentó iniciar sin ser master`);
+        return;
       }
 
-      enviarPregunta();
+      if (salas[salaId]?.inProgress) {
+        socket.emit('error', 'Juego ya en curso en esta sala');
+        return;
+      }
+
+      const rawQuestions = JSON.parse(JSON.stringify(require('./public/questions.json')));
+      const shuffled = rawQuestions.sort(() => 0.5 - Math.random());
+      const preguntas = shuffled.slice(0, questionCount);
+
+      salas[salaId] = {
+        votos: {},
+        preguntaId: null,
+        preguntaActual: null,
+        preguntas,
+        currentIndex: 0,
+        inProgress: true
+      };
+
+      console.log(`🎮 Iniciando juego en sala ${salaId} por ${socket.id}`);
+      enviarPregunta(salaId, duration);
     });
 
     socket.on('votar', async ({ salaId, preguntaId, opcionElegida, opcionIndex }) => {
@@ -166,42 +167,30 @@ function setupSocket(io) {
       sala.votos[socket.id] = opcionIndex;
       socket.data.ultimaRespuesta = { preguntaId, opcionIndex };
 
-      console.log(`📨 voto de ${socket.data?.nombre || socket.id}: opción ${opcionIndex} en sala ${salaId}`);
-
       io.to(salaId).emit('votosActualizados', sala.votos);
 
       if (socket.data.jugadorId) {
         const preguntaTexto = sala.preguntaActual.question;
-
-        const { error } = await supabase.from('respuestas').insert({
+        await supabase.from('respuestas').insert({
           jugador_id: socket.data.jugadorId,
           pregunta: preguntaTexto,
           opcion: opcionElegida
         });
-
-        if (error) {
-          console.error('❌ Error al guardar respuesta:', error.message);
-        } else {
-          console.log("✅ Respuesta guardada correctamente");
-        }
       }
     });
 
     socket.on('resetGame', async ({ salaId }) => {
       if (salas[salaId]) {
-      const { data, error } = await supabase
-      .from('salas')
-      .update({ finalizada: true })
-      .eq('id', salaId)
-      .select('*')
-      
-      
-      if (error) {
-        console.error('❌ Error al actualizar sala:', error.message);
-      } else {
-        console.log('✅ Sala actualizada:', data);
-      }
-          
+        await supabase
+          .from('salas')
+          .update({ finalizada: true })
+          .eq('id', salaId);
+
+        if (timeoutsPorSala[salaId]) {
+          clearTimeout(timeoutsPorSala[salaId]);
+          delete timeoutsPorSala[salaId];
+        }
+
         delete salas[salaId];
         io.to(salaId).emit('resetClient');
         console.log(`🔁 Juego reiniciado en sala ${salaId}`);

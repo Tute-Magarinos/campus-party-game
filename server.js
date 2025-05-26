@@ -14,6 +14,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const setupSocket = require('./socketHandlers');
 setupSocket(io);
 
-server.listen(3000, () => {
-  console.log('http://localhost:3000/');
+server.listen(3000, '0.0.0.0', () => {
+  console.log('✅ Servidor activo en http://localhost:3000');
 });
