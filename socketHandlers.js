@@ -189,23 +189,11 @@ function setupSocket(io) {
 
     socket.on('resetGame', async ({ salaId }) => {
       if (salas[salaId]) {
-        console.log(salaId);
-        let { data: salas} = await supabase.from('salas').select('*');   
-        console.log(salas.find(sala => sala.id === salaId));
-        console.log(salas.find(sala => sala.id === salaId).finalizada);
-    
-const { data: checkSala, error: checkError } = await supabase
-  .from('salas')
-  .select('*')
-  .eq('id', salaId);
-  
-
-console.log('🔍 Sala encontrada antes de update:', checkSala);
-
       const { data, error } = await supabase
       .from('salas')
       .update({ finalizada: true })
       .eq('id', salaId)
+      .select('*')
       
       
       if (error) {
