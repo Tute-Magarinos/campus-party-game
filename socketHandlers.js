@@ -137,7 +137,7 @@ function setupSocket(io) {
 
     console.log(`🧪 ${sock.data?.nombre || sock.id} eligió índice ${respuestaJugador}, correcta era ${correctIndex}`);
 
-    sock.emit("resultadoJugador", { correct: esCorrecta });
+     io.to(salaId).emit("resultadoJugador", { correct: esCorrecta });
 
     if (!respondio && sock.data?.jugadorId) {
       await supabase.from("respuestas").insert({
