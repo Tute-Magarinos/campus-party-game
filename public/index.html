@@ -36,6 +36,7 @@
     align-items: center;
    }
 
+
   .game {
     position: relative;
     background: #fff;          /* Fondo blanco detrás de todo */
@@ -50,11 +51,12 @@
     margin-bottom: 20px;
   }
   .game #timer-bar {
+    display: block;
     width: 0;
     height: 100%;
     background: #CFFE47;
     transition: width linear;
-  }
+}
   .game #question-number {
     font-size: 1rem;
     text-transform: uppercase;
@@ -256,167 +258,203 @@ h2 {
       <div class="option" id="option3"></div>
     </div>
     <div id="overlay"></div>
+    <div id="loading-screen" style="
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  font-size: 2rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+">
+  Cargando...
+</div>
   </div>
-  <script>
-    // URL del JSON de preguntas
-    const qsUrl = '/questions.json';
-    let QUESTIONS = [];
-    // Elementos DOM
-    const configSection = document.getElementById('configSection');
-    const lobbySection = document.getElementById('lobbySection');
-    const gameSection = document.getElementById('gameSection');
-    const salaInput = document.getElementById('salaIdInput');
-    const qCountInput = document.getElementById('qCountInput');
-    const qTimeInput = document.getElementById('qTimeInput');
-    const toLobbyBtn = document.getElementById('toLobbyBtn');
-    const startBtn = document.getElementById('startBtn');
-    const qrImg = document.getElementById('qrCode');
-    const qrImg2 = document.getElementById('qrCode2');
-    const lobbyUrl = document.getElementById('lobbyUrl');
-    const timerBar = document.getElementById('timer-bar');
-    const qIndexEl = document.getElementById('question-index');
-    const qTextEl = document.getElementById('question-text');
-    const opts = [0,1,2,3].map(i => document.getElementById('option'+i));
-    const overlay = document.getElementById('overlay');
-    const optionColors = ['#FF5722','#2196F3','#CFFE47','#FFEB3B'];
+ <script>
+  const qsUrl = '/questions.json';
+  let QUESTIONS = [];
 
-    let duration, timerAnim, overlayAnim;
-    const socket = io();
+  const configSection = document.getElementById('configSection');
+  const lobbySection = document.getElementById('lobbySection');
+  const gameSection = document.getElementById('gameSection');
+  const salaInput = document.getElementById('salaIdInput');
+  const qCountInput = document.getElementById('qCountInput');
+  const qTimeInput = document.getElementById('qTimeInput');
+  const toLobbyBtn = document.getElementById('toLobbyBtn');
+  const startBtn = document.getElementById('startBtn');
+  const qrImg = document.getElementById('qrCode');
+  const qrImg2 = document.getElementById('qrCode2');
+  const lobbyUrl = document.getElementById('lobbyUrl');
+  const timerBar = document.getElementById('timer-bar');
+  const qIndexEl = document.getElementById('question-index');
+  const qTextEl = document.getElementById('question-text');
+  const opts = [0,1,2,3].map(i => document.getElementById('option'+i));
+  const overlay = document.getElementById('overlay');
+  const optionColors = ['#FF5722','#2196F3','#CFFE47','#FFEB3B'];
 
-    socket.on("connect", () => {
+  let duration, timerAnim, overlayAnim;
+  const socket = io();
+
+  window.addEventListener("beforeunload", () => {
   const sala = salaInput.value.trim();
-  socket.emit("joinSala", { salaId: sala, tipo: "master" });
+  if (sala) {
+    navigator.sendBeacon(`/cerrar-sala?salaId=${encodeURIComponent(sala)}`);
+  }
 });
+  socket.on("connect", () => {
+    const sala = salaInput.value.trim();
+    socket.emit("joinSala", { salaId: sala, tipo: "master" });
+  });
 
-    // Cargar preguntas desde JSON
-    fetch(qsUrl)
-      .then(res => res.json())
-      .then(data => { QUESTIONS = data; })
-      .catch(err => console.error('Error cargando preguntas:', err));
+  fetch(qsUrl)
+    .then(res => res.json())
+    .then(data => { QUESTIONS = data; })
+    .catch(err => console.error('Error cargando preguntas:', err));
 
-    // Función para mostrar Configuración
-    function showConfig() {
-      clearTimeout(timerAnim);
-      clearTimeout(overlayAnim);
-      // Reset screens
-      configSection.classList.add('active');
-      lobbySection.classList.remove('active');
-      gameSection.classList.remove('active');
-    }
+  function showConfig() {
+    clearTimeout(timerAnim);
+    clearTimeout(overlayAnim);
+    configSection.classList.add('active');
+    lobbySection.classList.remove('active');
+    gameSection.classList.remove('active');
+  }
 
-    // Config -> Lobby
-    toLobbyBtn.onclick = () => {
-      showConfig(); // ensure clearing
-      duration = parseInt(qTimeInput.value)*1000;
-      const sala = salaInput.value.trim();
-      const qCount = parseInt(qCountInput.value,10);
-      const mobileUrl = `${location.origin}/mobile.html?salaId=${encodeURIComponent(sala)}`;
-      lobbyUrl.href = mobileUrl;
-      lobbyUrl.textContent = mobileUrl;
-      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
-      qrImg.style.display = 'block';
-      qrImg2.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
-      qrImg2.style.display = 'block';
-      lobbyUrl.style.display = 'block';
-      configSection.classList.remove('active');
-      lobbySection.classList.add('active');
-      socket.emit('joinSala', { salaId: sala, tipo: 'master' });
-      startBtn.dataset.sala = sala;
-      startBtn.dataset.qCount = qCount;
-    };
+  toLobbyBtn.onclick = () => {
+    showConfig();
+    duration = parseInt(qTimeInput.value)*1000;
+    const sala = salaInput.value.trim();
+    const qCount = parseInt(qCountInput.value, 10);
+    const mobileUrl = `${location.origin}/mobile.html?salaId=${encodeURIComponent(sala)}`;
+    lobbyUrl.href = mobileUrl;
+    lobbyUrl.textContent = mobileUrl;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
+    qrImg2.src = qrImg.src;
+    configSection.classList.remove('active');
+    lobbySection.classList.add('active');
+    socket.emit('joinSala', { salaId: sala, tipo: 'master' });
+    startBtn.dataset.sala = sala;
+    startBtn.dataset.qCount = qCount;
+  };
 
-    // Lobby -> Juego
-    startBtn.onclick = () => {
-      clearTimeout(timerAnim);
-      clearTimeout(overlayAnim);
-      const sala = startBtn.dataset.sala;
-      const qCount = parseInt(startBtn.dataset.qCount,10);
-      socket.emit("joinSala", { salaId: sala, tipo: "master" });
-      socket.emit('startGame', { salaId: sala, questionCount: qCount, duration: duration });
-      lobbySection.classList.remove('active');
-      gameSection.classList.add('active');
-    };
+startBtn.onclick = () => {
+  clearTimeout(timerAnim);
+  clearTimeout(overlayAnim);
 
-    socket.on('preguntaNueva', ({ preguntaIndex, preguntaText, options }) => {
-  // 1) Limpiar timeouts previos
+  const sala = startBtn.dataset.sala;
+  const qCount = parseInt(startBtn.dataset.qCount, 10);
+
+  // Mostrar pantalla de carga
+  const loader = document.getElementById("loading-screen");
+  loader.style.display = "flex";
+
+  // Ocultar lobby y mostrar game
+  lobbySection.classList.remove('active');
+  gameSection.classList.add('active');
+
+  // Esperar a que el DOM termine de renderizar antes de empezar el juego
+  setTimeout(() => {
+    loader.style.display = "none";
+    socket.emit("joinSala", { salaId: sala, tipo: "master" });
+    socket.emit("startGame", {
+      salaId: sala,
+      questionCount: qCount,
+      duration: duration
+    });
+  }, 500); // podés ajustar a 300ms si querés más rápido
+};
+
+ socket.on("preguntaNueva", ({ salaId: incomingSalaId, preguntaIndex, preguntaText, options }) => {
+  const sala = salaInput.value.trim();
+  if (incomingSalaId !== sala) return;
+
   clearTimeout(timerAnim);
   clearTimeout(overlayAnim);
   overlay.style.display = 'none';
 
-  // 2) Asignar las respuestas SIN tocar el JSON local de preguntas:
   opts.forEach((el, i) => {
-  el.textContent     = options[i];
-  el.style.background = '#ffffff';
-  el.style.borderColor = optionColors[i];
-  el.style.opacity = '1';
+    el.textContent = options[i];
+    el.style.background = '#ffffff';
+    el.style.borderColor = optionColors[i];
+    el.style.opacity = '1';
   });
 
-  // 3) Si quieres seguir mostrando el texto de la pregunta desde tu JSON local:
   qTextEl.textContent = preguntaText;
   qIndexEl.textContent = preguntaIndex + 1;
 
-  // 4) Reiniciar y arrancar la animación de la barra:
-  timerBar.style.transition = 'none';
-  timerBar.style.width      = '0%';
-  void timerBar.offsetWidth;  // fuerza reflow
-  timerBar.style.transition = `width ${duration}ms linear`;
-  timerBar.style.width      = '100%';
+  // Reparar animación de barra de tiempo con delay para garantizar render
+setTimeout(() => {
+  requestAnimationFrame(() => {
+    timerBar.style.transition = 'none';
+    timerBar.style.width = '0%';
+    timerBar.offsetHeight;
+    requestAnimationFrame(() => {
+      timerBar.style.transition = `width ${duration}ms linear`;
+      timerBar.style.width = '100%';
+    });
+  });
+}, 50);
+});
+  
+
+  socket.on("respuestaCorrecta", ({ correctIndex, salaId: incomingSalaId }) => {
+  const sala = salaInput.value.trim();
+  if (incomingSalaId !== sala) return;
+
+  console.log("📥 Recibida respuesta correcta:", correctIndex, "para sala", incomingSalaId);
+
+  setTimeout(() => {
+    if (!opts[correctIndex]) {
+      console.warn("⚠️ No hay opciones visibles todavía.");
+      return;
+    }
+
+    clearTimeout(timerAnim);
+    opts.forEach((el, i) => {
+      if (i === correctIndex) {
+        el.style.background = optionColors[i];
+        el.style.borderColor = optionColors[i];
+      } else {
+        el.style.opacity = '0.4';
+      }
+    });
+
+    overlayAnim = setTimeout(() => {
+      opts.forEach(el => {
+        el.style.background = '#2a2a2a';
+        el.style.borderColor = 'transparent';
+        el.style.opacity = '1';
+      });
+    }, duration);
+  }, 200); // 💡 Esperar 200ms antes de aplicar efecto visual
 });
 
+  socket.on("terminarJuego", ({ mensaje, salaId: incomingSalaId }) => {
+    const sala = salaInput.value.trim();
+    if (incomingSalaId !== sala) return;
 
-socket.on('respuestaCorrecta', ({ correctIndex }) => {
-  clearTimeout(timerAnim);
-  opts.forEach((el, i) => {
-    if (i === correctIndex) {
-      el.style.background = optionColors[i];
-      el.style.borderColor = optionColors[i];
-    } else {
-      el.style.opacity = '0.4';
+    clearTimeout(overlayAnim);
+    overlay.style.display = 'flex';
+    overlay.textContent = mensaje || "¡Fin del juego!";
+  });
+
+  socket.on("siguientePregunta", () => {
+    overlay.style.display = 'flex';
+    overlay.textContent = 'Siguiente pregunta...';
+    overlayAnim = setTimeout(() => overlay.style.display = 'none', duration);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === 'q' || event.key === 'Q') {
+      const sala = salaInput.value.trim();
+      socket.emit('resetGame', { salaId: sala });
+      showConfig();
     }
   });
-  overlayAnim = setTimeout(() => {
-    opts.forEach(el => {
-      el.style.background = '#2a2a2a';
-      el.style.borderColor = 'transparent';
-      el.style.opacity = '1';
-    });
-  }, duration);
-});
+</script>
 
 
-    // Siguiente pregunta
-    socket.on('siguientePregunta', () => {
-      clearTimeout(overlayAnim);
-      overlay.style.display = 'flex';
-      overlay.textContent = 'Siguiente pregunta';
-      overlayAnim = setTimeout(() => overlay.style.display = 'none', duration);
-    });
-
-    // Fin de juego
-    socket.on('terminarJuego', () => {
-      clearTimeout(overlayAnim);
-      overlay.style.display = 'flex';
-      overlay.textContent = '¡Fin del juego!';
-    });
-
-
-
-
-    // Reconexión automática
-    socket.on('connect', () => {
-      const sala = salaInput.value.trim();
-      socket.emit('joinSala', { salaId: sala, tipo: 'master' });
-    });
-
-      document.addEventListener('keydown', function(event) {
-      if (event.key === 'q' || event.key === 'Q') {
-        // Emitir reset al servidor
-      const sala = salaIdInput.value.trim();
-      socket.emit('resetGame', { salaId: sala });
-      // Reiniciar tu UI local
-      showConfig();
-      }
-      });
-  </script>
 </body>
 </html>

@@ -179,7 +179,7 @@
 }
 </style>
 
-  <script src="/socket.io/socket.io.js">
+ <script src="https://cdn.socket.io/4.0.1/socket.io.min.js">
   const restartBtn = document.getElementById("restart-btn");
  const restartContainer = document.getElementById("restart-container");
 
@@ -239,24 +239,16 @@
   const questionText = document.getElementById("question-text-mobile");
   const answerButtons = document.getElementById("answer-buttons");
 
-  
-
-  // Leer sala desde la URL (por QR)
   const salaParam = new URLSearchParams(window.location.search).get("salaId");
   if (salaParam) salaInput.value = salaParam;
 
-  // Recuperar nombre y correo del localStorage
   const nombreGuardado = localStorage.getItem("jugador_nombre");
   const correoGuardado = localStorage.getItem("jugador_correo");
   if (nombreGuardado) nameInput.value = nombreGuardado;
   if (correoGuardado) emailInput.value = correoGuardado;
 
-  // Autoconexión si hay datos guardados y sala por URL
   if (nombreGuardado && correoGuardado && salaParam) {
     salaId = salaParam;
-    nameInput.value = nombreGuardado;
-    emailInput.value = correoGuardado;
-    salaInput.value = salaParam;
 
     socket.emit("joinSala", {
       salaId,
@@ -287,80 +279,87 @@
 
     form.style.display = "none";
     waiting.style.display = "block";
-    
   };
 
   socket.on("preguntaNueva", (data) => {
+    if (data.salaId !== salaId) return;
+
     questionText.classList.remove("hide-important");
     answerButtons.classList.remove("hide-important");
-document.getElementById("end-message").style.display = "none";
+    document.getElementById("end-message").style.display = "none";
 
     localStorage.removeItem("juego_finalizado");
     preguntaId = data.preguntaId;
 
-  waiting.style.display = "none";
-  waiting_error.style.display = "none";
-  questionText.style.display = "block";
-  questionText.innerText = data.preguntaText || "Pregunta sin texto";
+    waiting.style.display = "none";
+    waiting_error.style.display = "none";
+    questionText.style.display = "block";
+    questionText.innerText = data.preguntaText || "Pregunta sin texto";
 
-  answerButtons.innerHTML = "";
-  answerButtons.style.display = "grid";
+    answerButtons.innerHTML = "";
+    answerButtons.style.display = "grid";
 
-  const opciones = data.options || [];
-  opciones.forEach((opcion, index) => {
-    const btn = document.createElement("button");
-    btn.innerText = opcion;
-    btn.id = "btn" + index;
+    const opciones = data.options || [];
+    opciones.forEach((opcion, index) => {
+      const btn = document.createElement("button");
+      btn.innerText = opcion;
+      btn.id = "btn" + index;
 
-    btn.onclick = () => {
-      socket.emit("votar", {
-        salaId,
-        preguntaId,
-        opcionElegida: opcion,
-        opcionIndex: index
-      });
+      btn.onclick = () => {
+        socket.emit("votar", {
+          salaId,
+          preguntaId,
+          opcionElegida: opcion,
+          opcionIndex: index
+        });
 
-      questionText.innerText = "✅ ¡Respuesta enviada!";
-      answerButtons.innerHTML = "";
-    };
+        questionText.innerText = "✅ ¡Respuesta enviada!";
+        answerButtons.innerHTML = "";
+      };
 
-    answerButtons.appendChild(btn);
+      answerButtons.appendChild(btn);
+    });
   });
-});
 
   socket.on("resultadoJugador", (data) => {
     questionText.innerText = data.correct ? "✅ ¡Correcto!" : "❌ Incorrecto";
     answerButtons.innerHTML = "";
   });
 
-socket.on("terminarJuego", () => {
-  document.getElementById("end-message").style.display = "block";
-  questionText.style.display = "none";
-  answerButtons.innerHTML = "";
-  answerButtons.style.display = "none";
-});
+  socket.on("respuestaCorrecta", (data) => {
+    if (data.salaId !== salaId) return;
+    // Opcional: mostrar resultado correcto si querés
+  });
 
-socket.on("salaNotFound", () => {
-  form.style.display = "none";
-  waiting_error.classList.remove("hide-important");
-  waiting.style.display = "none";
-});
+  socket.on("terminarJuego", (data) => {
+    if (data.salaId !== salaId) return;
+    document.getElementById("end-message").style.display = "block";
+    questionText.style.display = "none";
+    answerButtons.innerHTML = "";
+    answerButtons.style.display = "none";
+  });
 
-socket.on("resetClient", () => {
- localStorage.removeItem("juego_finalizado");
+  socket.on("salaNotFound", () => {
+    form.style.display = "none";
+    waiting_error.classList.remove("hide-important");
+    waiting.style.display = "none";
+  });
 
-  form.style.display = "block";
-  waiting.style.display = "none";
-  waiting_error.classList.add("hide-important");
-  questionText.classList.add("hide-important");
-  answerButtons.classList.add("hide-important");
-  questionText.style.display = "none";
-  answerButtons.style.display = "none";
+  socket.on("resetClient", () => {
+    localStorage.removeItem("juego_finalizado");
 
-  document.getElementById("end-message").style.display = "none";
-});
+    form.style.display = "block";
+    waiting.style.display = "none";
+    waiting_error.classList.add("hide-important");
+    questionText.classList.add("hide-important");
+    answerButtons.classList.add("hide-important");
+    questionText.style.display = "none";
+    answerButtons.style.display = "none";
 
+    document.getElementById("end-message").style.display = "none";
+  });
 </script>
+
 
 </body>
 </html>
