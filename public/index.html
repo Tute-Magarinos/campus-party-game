@@ -36,6 +36,7 @@
     align-items: center;
    }
 
+
   .game {
     position: relative;
     background: #fff;          /* Fondo blanco detrás de todo */
@@ -50,11 +51,12 @@
     margin-bottom: 20px;
   }
   .game #timer-bar {
+    display: block;
     width: 0;
     height: 100%;
     background: #CFFE47;
     transition: width linear;
-  }
+}
   .game #question-number {
     font-size: 1rem;
     text-transform: uppercase;
@@ -256,6 +258,20 @@ h2 {
       <div class="option" id="option3"></div>
     </div>
     <div id="overlay"></div>
+    <div id="loading-screen" style="
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  font-size: 2rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+">
+  Cargando...
+</div>
   </div>
  <script>
   const qsUrl = '/questions.json';
@@ -282,6 +298,12 @@ h2 {
   let duration, timerAnim, overlayAnim;
   const socket = io();
 
+  window.addEventListener("beforeunload", () => {
+  const sala = salaInput.value.trim();
+  if (sala) {
+    navigator.sendBeacon(`/cerrar-sala?salaId=${encodeURIComponent(sala)}`);
+  }
+});
   socket.on("connect", () => {
     const sala = salaInput.value.trim();
     socket.emit("joinSala", { salaId: sala, tipo: "master" });
@@ -317,16 +339,32 @@ h2 {
     startBtn.dataset.qCount = qCount;
   };
 
-  startBtn.onclick = () => {
-    clearTimeout(timerAnim);
-    clearTimeout(overlayAnim);
-    const sala = startBtn.dataset.sala;
-    const qCount = parseInt(startBtn.dataset.qCount, 10);
+startBtn.onclick = () => {
+  clearTimeout(timerAnim);
+  clearTimeout(overlayAnim);
+
+  const sala = startBtn.dataset.sala;
+  const qCount = parseInt(startBtn.dataset.qCount, 10);
+
+  // Mostrar pantalla de carga
+  const loader = document.getElementById("loading-screen");
+  loader.style.display = "flex";
+
+  // Ocultar lobby y mostrar game
+  lobbySection.classList.remove('active');
+  gameSection.classList.add('active');
+
+  // Esperar a que el DOM termine de renderizar antes de empezar el juego
+  setTimeout(() => {
+    loader.style.display = "none";
     socket.emit("joinSala", { salaId: sala, tipo: "master" });
-    socket.emit("startGame", { salaId: sala, questionCount: qCount, duration: duration });
-    lobbySection.classList.remove('active');
-    gameSection.classList.add('active');
-  };
+    socket.emit("startGame", {
+      salaId: sala,
+      questionCount: qCount,
+      duration: duration
+    });
+  }, 500); // podés ajustar a 300ms si querés más rápido
+};
 
  socket.on("preguntaNueva", ({ salaId: incomingSalaId, preguntaIndex, preguntaText, options }) => {
   const sala = salaInput.value.trim();
@@ -347,13 +385,17 @@ h2 {
   qIndexEl.textContent = preguntaIndex + 1;
 
   // Reparar animación de barra de tiempo con delay para garantizar render
-  setTimeout(() => {
+setTimeout(() => {
+  requestAnimationFrame(() => {
     timerBar.style.transition = 'none';
     timerBar.style.width = '0%';
-    timerBar.offsetHeight; // fuerza reflow
-    timerBar.style.transition = `width ${duration}ms linear`;
-    timerBar.style.width = '100%';
-  }, 20);
+    timerBar.offsetHeight;
+    requestAnimationFrame(() => {
+      timerBar.style.transition = `width ${duration}ms linear`;
+      timerBar.style.width = '100%';
+    });
+  });
+}, 50);
 });
   
 
