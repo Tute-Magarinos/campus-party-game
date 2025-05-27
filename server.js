@@ -114,5 +114,5 @@ app.get('/results', async (req, res) => {
 
 server.listen(3000, '0.0.0.0', () => {
   console.log('✅ Servidor activo en http://localhost:3000');
-  console.log('✅tabla de resultados en http://localhost:3000/results')
+  console.log('🏆 tabla de resultados en http://localhost:3000/results')
 });
