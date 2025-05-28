@@ -22,7 +22,7 @@
     display: none;
     width: 653px;
     height: 745px;
-    background: #1e1e1e;
+    background: #ffffff;
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.5);
@@ -36,6 +36,12 @@
     align-items: center;
    }
 
+  .active-lobby{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
   .game {
     position: relative;
     background: #fff;          /* Fondo blanco detrás de todo */
@@ -119,16 +125,18 @@ h2 {
   margin-bottom: 20px;
   font-size: 2rem;
   letter-spacing: 1px;
-  color: #CFFE47;
+  color: #000000;
   text-align: center;
 }
-
+.hide-important {
+  display: none !important;
+}
 /* CONFIGURACIÓN */
 .config label {
   display: block;
   margin: 15px 0 5px;
   font-size: 0.9rem;
-  color: #ccc;
+  color: #000000;
 }
 .config input {
   width: 100%;
@@ -155,18 +163,46 @@ h2 {
   background: #b5e23d;
 }
 
+#lobbySection{
+  background-image: url("img/img2.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#homeSection{
+  background-image: url("img/inicio.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#homeSection{
+  background-image: url("img/final.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 /* LOBBY */
 .lobby p {
   font-size: 1.1rem;
-  margin: 20px 0 10px;
-  color: #ddd;
+  margin: 10px 0 10px;
+  color: #000000;
   text-align: center;
 }
 .lobby #qrCode {
   display: block;
-  width: 200px;
+  width:200px;
   height: 200px;
-  margin: 0 auto 20px;
+  margin: 50px auto 0px;
   border: 4px solid #333;
   border-radius: 8px;
   background: #fff;
@@ -174,7 +210,7 @@ h2 {
 
 .lobby a {
   display: block;
-  color: #CFFE47;
+  color: #1905cc;
   word-break: break-all;
   margin-bottom: 20px;
   text-align: center;
@@ -195,26 +231,32 @@ h2 {
 .lobby button:hover {
   background: #b5e23d;
 }
+
 #qr2Div{
+  background-image: url("img/qrholder.png");
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 184px;
   display: flex;
   flex-direction: row;
-  justify-content: baseline;
+  justify-content: start;
   align-items: center;
 }
 
-#qr2Div h1{
-  text-align: start;
-  padding-left: 50px;
-  padding-right: 50px;
-}
 #qrCode2 {
   display: block;
+  justify-self: start;
   width: 150px;
   height: 150px;
-  margin: 0 auto 20px;
+  margin: 0 10px;
   border: 4px solid #333;
   border-radius: 8px;
   background: #fff;
+}
+
+#banner{
+  width: 100%;
 }
 
 </style>
@@ -223,7 +265,10 @@ h2 {
 </head>
 <body>
   <!-- Configuración -->
-  <div id="configSection" class="screen active config">
+   <div id="homeSection" class="screen active home"></div>
+   <div id="finSection" class="screen fin"></div>
+  <div id="configSection" class="screen config">
+    <img id="banner" src="img/img1.png" alt="img">
     <h2>Configuración del Juego</h2>
     <label for="salaIdInput">ID de Sala</label>
     <input id="salaIdInput" placeholder="sala1" value="sala1" />
@@ -235,17 +280,19 @@ h2 {
   </div>
   <!-- Lobby -->
   <div id="lobbySection" class="screen lobby">
-    <h2>Lobby</h2>
-    <p>Escanea este QR en tu celular:</p>
-    <img id="qrCode" src="" alt="QR" />
-    <p>o visita:</p>
-    <a id="lobbyUrl" href="#" target="_blank"></a>
-    <button id="startBtn">Iniciar Juego</button>
-  </div>
+    
+      <p class="hide-important">Escanea este QR en tu celular:</p>
+      <img id="qrCode" src="" alt="QR" />
+      <p class="hide-important">o visita:</p>
+      <a class="hide-important" id="lobbyUrl" href="#" target="_blank"></a>
+      <button class="hide-important" id="startBtn">Iniciar Juego</button>
+  
+    </div>
   <!-- Juego -->
   <div id="gameSection" class="screen game">
     <div id="qr2Div"><img id="qrCode2" src="" alt="QR2" />
-    <h1>¡Escaneá el QR y unite a la trivia!</h1></div>
+    </div>
+    
     <div id="timer-container"><div id="timer-bar"></div></div>
     <div id="question-number">Pregunta Nro <span id="question-index">0</span></div>
     <div id="question-text"></div>
@@ -263,6 +310,8 @@ h2 {
 
   const configSection = document.getElementById('configSection');
   const lobbySection = document.getElementById('lobbySection');
+  const homeSection = document.getElementById('homeSection');
+  const finalSection = document.getElementById('finalSection');
   const gameSection = document.getElementById('gameSection');
   const salaInput = document.getElementById('salaIdInput');
   const qCountInput = document.getElementById('qCountInput');
@@ -296,7 +345,7 @@ h2 {
     clearTimeout(timerAnim);
     clearTimeout(overlayAnim);
     configSection.classList.add('active');
-    lobbySection.classList.remove('active');
+    lobbySection.classList.remove('active-lobby');
     gameSection.classList.remove('active');
   }
 
@@ -311,7 +360,7 @@ h2 {
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mobileUrl)}`;
     qrImg2.src = qrImg.src;
     configSection.classList.remove('active');
-    lobbySection.classList.add('active');
+    lobbySection.classList.add('active-lobby');
     socket.emit('joinSala', { salaId: sala, tipo: 'master' });
     startBtn.dataset.sala = sala;
     startBtn.dataset.qCount = qCount;
@@ -324,7 +373,7 @@ h2 {
     const qCount = parseInt(startBtn.dataset.qCount, 10);
     socket.emit("joinSala", { salaId: sala, tipo: "master" });
     socket.emit("startGame", { salaId: sala, questionCount: qCount, duration: duration });
-    lobbySection.classList.remove('active');
+    lobbySection.classList.remove('active-lobby');
     gameSection.classList.add('active');
   };
 
@@ -396,6 +445,8 @@ h2 {
     clearTimeout(overlayAnim);
     overlay.style.display = 'flex';
     overlay.textContent = mensaje || "¡Fin del juego!";
+    finalSection.classList.remove('active');
+    gameSection.classList.add('active');
   });
 
   socket.on("siguientePregunta", () => {
@@ -409,6 +460,45 @@ h2 {
       const sala = salaInput.value.trim();
       socket.emit('resetGame', { salaId: sala });
       showConfig();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === 's' || event.key === 'S') {
+     clearTimeout(timerAnim);
+    clearTimeout(overlayAnim);
+    const sala = startBtn.dataset.sala;
+    const qCount = parseInt(startBtn.dataset.qCount, 10);
+    socket.emit("joinSala", { salaId: sala, tipo: "master" });
+    socket.emit("startGame", { salaId: sala, questionCount: qCount, duration: duration });
+    lobbySection.classList.remove('active-lobby');
+    gameSection.classList.add('active');
+    }
+  });
+
+   document.addEventListener("keydown", (event) => {
+    if (event.key === '1') {
+    configSection.classList.add('active');
+    homeSection.classList.remove('active');
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === '0') {
+    configSection.classList.remove('active');
+    homeSection.classList.add('active');
+    lobbySection.classList.remove('active');
+    gameSection.classList.remove('active');
+    }
+  });
+
+   document.addEventListener("keydown", (event) => {
+    if (event.key === 'f') {
+    configSection.classList.remove('active');
+    homeSection.classList.add('active');
+    finalSection.classList.remove('active');
+    lobbySection.classList.remove('active');
+    gameSection.classList.remove('active');
     }
   });
 </script>
