@@ -131,6 +131,21 @@ function setupSocket(io) {
         socket.emit('preguntaNueva', sala.preguntaActual);
       }
     });
+    socket.on("cerrarSala", async ({ salaId }) => {
+  console.log(`❌ Master cerró la sala ${salaId}`);
+
+  io.to(salaId).emit("terminarJuego", {
+    salaId,
+    mensaje: "El juego ha finalizado porque el master cerró la sala."
+  });
+
+  // ✅ Eliminar sala de memoria
+  delete salas[salaId];
+
+  // ✅ Marcar como finalizada en base de datos si estás usando Supabase
+  await supabase.from("salas").update({ finalizada: true }).eq("id", salaId);
+  await supabase.from("respuestas").delete().eq("sala_id", salaId);
+});
 
     socket.on('startGame', ({ salaId, questionCount, duration }) => {
       if (socket.data?.tipo !== 'master') {
