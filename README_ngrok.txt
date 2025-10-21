@@ -99,6 +99,7 @@ Esto mostrará algo como:
 ─────────────────────────────────────────────
 
 datos de cuenta kgrok:
+nombre: CampusProyect
 correo: exp.campus.party@gmail.com
 contraseña: @Experienciacampus2025
 
